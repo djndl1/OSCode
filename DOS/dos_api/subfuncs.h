@@ -1,7 +1,7 @@
 #ifndef SUBFUNCS_H_
 #define SUBFUNCS_H_
 
-#define SUBFUNC_GET_DOS_VERSION 0x30
-
+#define SUBFUNC_SET_BREAK_FLAG 0x01
+#define SUBFUNC_GET_BREAK_FLAG 0x00
 
 #endif // SUBFUNCS_H_

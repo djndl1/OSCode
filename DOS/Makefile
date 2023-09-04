@@ -30,6 +30,9 @@ INTR_SRC=intr.c
 intr.exe: builddir libdosapi.a $(INTR_SRC)
 	$(CC) $(CFLAGS) $(TARGET) $(INTR_SRC) $(LDFLAGS) -o $(BUILD_DIR)/$@
 
+docs: doxygen/Doxyfile
+	doxygen $<
+
 .PHONY: clean
 clean:
 	-rm -rf dos_api/*.o
