@@ -56,6 +56,32 @@ extern "C" {
 #endif
 
 /**
+ * @brief Character input without echo
+ *
+ * Reads a character from the standard input device
+ * without displaying the character on the standard output device.
+ * If no character exists when the function is called, the
+ * function waits until a character is available.
+ * Since standard input can be redirected,
+ * this function can read a character from an
+ * input device other than the keyboard.
+ * The characters read may originate from other
+ * devices or from a file. If the characters come from a file,
+ * the input doesn't redirect
+ * to the keyboard on reaching the end of file,
+ * so the function continues to tty reading
+ * data from the file after it passes the end of fIle.
+ *
+ * If extended key codes are read, the function reutrns code 0.
+ * The function must be called again to read the actual code.
+ * If the function encounters a `<Ctrl><C>` character (ASCII code 3),
+ * it calls interrupt 23H.
+ *
+ * @returns the character read
+ */
+u8 dos_read_char_without_echo();
+
+/**
  * @brief Reads the `<Ctrl><Break>` flag
  *
  * This determines whether DOS should test for active `<Ctrl><C>` or `<Ctrl><Break>`
@@ -64,7 +90,7 @@ extern "C" {
  *
  * @returns if `true`, test only during character input/output, else test on every function call
  */
-bool get_break_flag();
+bool dos_get_break_flag();
 
 /**
  * @brief Set the `<Ctrl><Break>` flag
@@ -77,14 +103,14 @@ bool get_break_flag();
  * @param break_flag `false` if test only during character input/output,
  *                    `true` if test on every function call
  */
-void set_break_flag(bool break_flag);
+void dos_set_break_flag(bool break_flag);
 
 /**
  * @brief returns the DOS version number
  *
  * @returns the DOS version in the form of @ref dos_version_t
  */
-dos_version_t get_dos_version();
+dos_version_t dos_get_dos_version();
 
 #ifdef __cpp
 }

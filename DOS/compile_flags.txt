@@ -1,3 +1,4 @@
 -I/media/djn/opt/software/DJGPP/djgpp/i586-pc-msdosdjgpp/sys-include
 -I./include
+-I./dos_api
 -std=c99
