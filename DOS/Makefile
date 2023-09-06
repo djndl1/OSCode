@@ -10,7 +10,7 @@ TARGET=-b dos
 LDFLAGS=-Lbuild -llibdosapi
 AR=wlib
 
-DOS_API_SRC=dos_api/dos_api.c
+DOS_API_SRC=dos_api/dos_api.c dos_api/bios_api.c
 BUILD_DIR=build
 
 .PHONY: all
@@ -21,10 +21,10 @@ builddir:
 	mkdir -p $(BUILD_DIR)
 
 libdosapi.a: builddir dos_api/*.o
-	$(AR) -q -n -fa $(BUILD_DIR)/$@ +dos_api/dos_api.o
+	$(AR) -q -n -fa $(BUILD_DIR)/$@ +dos_api/dos_api.o +dos_api/bios_api.o
 
 dos_api/%.o : dos_api/%.c
-	$(CC) -c $(CFLAGS) $(TARGET) $< -o $@
+	$(CC) -c $(CFLAGS) $(TARGET) $^ -o $@
 
 INTR_SRC=intr.c
 intr.exe: builddir libdosapi.a $(INTR_SRC)

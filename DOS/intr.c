@@ -22,6 +22,20 @@ void read_until_break()
     }
 }
 
+void read_kbd_until_break()
+{
+    printf("BIOS Keyboard read test,\n");
+    printf("Hit enter to break.\n");
+    while (true) {
+        bios_keyboard_input_t input = bios_read_keyboard_input();
+
+        if (input.ascii_code == '\r') break;
+
+        printf("A key is pressed: ASCII %d, Scan %d\n",
+               input.ascii_code, input.scan_code);
+    }
+}
+
 int main()
 {
     dos_version_t ver = dos_get_dos_version();
@@ -31,10 +45,10 @@ int main()
     printf("Current break flag is %d\n", dos_get_break_flag());
     dos_set_break_flag(true);
     printf("Current break flag is %d\n", dos_get_break_flag());
+
+    read_kbd_until_break();
+    read_until_break();
+
     dos_set_break_flag(false);
     printf("Current break flag is %d\n", dos_get_break_flag());
-
-    printf("exiting\n");
-
-    read_until_break();
 }

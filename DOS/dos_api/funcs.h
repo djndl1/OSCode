@@ -7,5 +7,7 @@
 
 #define FUNC_BREAK_FLAG 0x33
 
+#define BIOS_KEYBOARD_READ_CHAR 0x00
+
 
 #endif // FUNCS_H_

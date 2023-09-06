@@ -4,19 +4,10 @@
 #include <i86.h>
 #endif
 
-#include <dos.h>
+#include "common.h"
 
 #include "subfuncs.h"
 #include "funcs.h"
-
-static union REGS create_in_regs(u8 func_no, u8 subfunc_no)
-{
-    union REGS i_regs = { 0 };
-    i_regs.h.ah = func_no;
-    i_regs.h.al = subfunc_no;
-
-    return i_regs;
-}
 
 u8 dos_read_char_without_echo()
 {
