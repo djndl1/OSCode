@@ -51,27 +51,6 @@ typedef struct _dos_version {
     u8 minor;
 } dos_version_t;
 
-/**
- * @struct bios_keyboard_input_t
- *
- * keyboard input result from BIOS
- */
-typedef struct _bios_kbd_input {
-    /**
-     * ASCII code of a keyboard input
-     *
-     * @memberof bios_keyboard_input_t
-     */
-    u8 ascii_code;
-
-    /**
-     * Scan code of a keyboard input
-     *
-     * @memberof bios_keyboard_input_t
-     */
-    u8 scan_code;
-} bios_keyboard_input_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -133,9 +112,7 @@ void dos_set_break_flag(bool break_flag);
  */
 dos_version_t dos_get_dos_version();
 
-bios_keyboard_input_t bios_read_keyboard_input();
-
-#ifdef __cpp
+#ifdef __cplusplus
 }
 #endif
 

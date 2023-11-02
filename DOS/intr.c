@@ -1,4 +1,5 @@
 #include "dos_api.h"
+#include "bios_api.h"
 
 #include <stdio.h>
 #include <stdbool.h>
