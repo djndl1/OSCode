@@ -3,9 +3,12 @@ cmake_minimum_required(VERSION 3.12)
 project(Win32API)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_SYSTEM_NAME WINDOWS)
-include_directories(lib/include)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include_directories(lib/include)
 
 add_executable(CreateProcess
   src/CreateProcess.cpp
@@ -30,6 +33,15 @@ target_compile_definitions(cp
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x6000)
 target_link_options(cp PRIVATE -mconsole)
 
-if(EXISTS ${CMAKE_BINARY_DIR/cp.exe})
-file(RENAME ${CMAKE_BINARY_DIR}/cp.exe ${CMAKE_BINARY_DIR}/cpc.exe)
-endif()
+add_custom_target(
+  cpc
+  COMAMND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_BINARY_DIR}/cp.exe
+  ${CMAKE_BINARY_DIR}/cpc.exe
+)
+add_custom_target(
+  cpw32
+  COMAMND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_BINARY_DIR}/cp.exe
+  ${CMAKE_BINARY_DIR}/cpw32.exe
+)
