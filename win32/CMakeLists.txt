@@ -34,14 +34,16 @@ target_compile_definitions(cp
 target_link_options(cp PRIVATE -mconsole)
 
 add_custom_target(
-  cpc
-  COMAMND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/cp.exe
-  ${CMAKE_BINARY_DIR}/cpc.exe
-)
-add_custom_target(
-  cpw32
-  COMAMND ${CMAKE_COMMAND} -E copy
+  cpw32 ALL
+  ${CMAKE_COMMAND} -E copy
   ${CMAKE_BINARY_DIR}/cp.exe
   ${CMAKE_BINARY_DIR}/cpw32.exe
 )
+add_dependencies(cpw32 cp)
+add_custom_target(
+  cpc ALL
+  ${CMAKE_COMMAND} -E copy
+  ${CMAKE_BINARY_DIR}/cp.exe
+  ${CMAKE_BINARY_DIR}/cpc.exe
+)
+add_dependencies(cpc cp)

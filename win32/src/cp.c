@@ -29,12 +29,12 @@ wchar_t *char_str_to_wchar(const char *cstr)
     size_t len = strlen(cstr);
     if (len == 0) return L"";
 
-    wchar_t *wstr = malloc(sizeof(wchar_t) * len + 1);
+    wchar_t *wstr = malloc(sizeof(wchar_t) * (len + 1));
     if (wstr == NULL) {
         return NULL;
     }
 
-    size_t converted_wchar_count = mbstowcs(wstr, cstr, len);
+    size_t converted_wchar_count = mbstowcs(wstr, cstr, len + 1);
 
     return wstr;
 }
@@ -49,7 +49,7 @@ int copy_with_win32(const char *dst, const char *src)
         goto ret_point;
     }
 
-    wchar_t *wdst = char_str_to_wchar(src);
+    wchar_t *wdst = char_str_to_wchar(dst);
     if (wdst == NULL) {
         retval = CHAR_ERROR;
         goto free_wsrc;
@@ -139,7 +139,7 @@ int copy_with_libc(const char *dst, const char *src)
 
     size_t bytes_in = 0;
     while ((bytes_in = fread(rec, 1, BUF_SIZE, src_file)) > 0) {
-        size_t bytes_out = fwrite(rec, 1, BUF_SIZE, dst_file);
+        size_t bytes_out = fwrite(rec, 1, bytes_in, dst_file);
         if (bytes_in != bytes_out) {
             perror("Fatal write error");
 
@@ -182,7 +182,7 @@ bool string_ends_with(const char *str, const char *substr)
     }
 
     while (str_idx > 0 && substr_idx > 0
-           && str[str_idx--] == str[substr_idx--]) {
+           && str[--str_idx] == substr[--substr_idx]) {
     }
 
     if (substr_idx != 0) {
@@ -200,11 +200,11 @@ int main(int argc, char *argv[])
         return ARGUMENT_ERROR;
     }
 
-    //if (string_ends_with(argv[0], "cpc.exe")) {
-     //   return copy_with_libc(argv[2], argv[1]);
-    //} else if (string_ends_with(argv[0], "cpw32.exe")) {
+    if (string_ends_with(argv[0], "cpc.exe")) {
+        return copy_with_libc(argv[2], argv[1]);
+    } else if (string_ends_with(argv[0], "cpw32.exe")) {
         return copy_with_win32(argv[2], argv[1]);
-    //}
+    }
 
     fprintf(stderr, "Unknown mode: %s\n", argv[0]);
     return ARGUMENT_ERROR;
