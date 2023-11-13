@@ -92,12 +92,12 @@ int copy_with_win32(const char *dst, const char *src)
 	}
 
 close_out:
-    if (hOut != NULL) {
+    if (hOut != INVALID_HANDLE_VALUE) {
         CloseHandle (hOut);
         hOut = INVALID_HANDLE_VALUE;
     }
 close_in:
-    if (hIn != NULL) {
+    if (hIn != INVALID_HANDLE_VALUE) {
         CloseHandle (hIn);
         hIn = INVALID_HANDLE_VALUE;
     }
