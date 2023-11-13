@@ -47,3 +47,10 @@ add_custom_target(
   ${CMAKE_BINARY_DIR}/cpc.exe
 )
 add_dependencies(cpc cp)
+add_custom_target(
+  cpw32s ALL
+  ${CMAKE_COMMAND} -E copy
+  ${CMAKE_BINARY_DIR}/cp.exe
+  ${CMAKE_BINARY_DIR}/cpw32s.exe
+)
+add_dependencies(cpw32s cp)

@@ -39,6 +39,39 @@ wchar_t *char_str_to_wchar(const char *cstr)
     return wstr;
 }
 
+int copy_with_win32_simplified(const char *dst, const char *src)
+{
+    int retval = 0;
+
+    wchar_t *wsrc = char_str_to_wchar(src);
+    if (wsrc == NULL) {
+        retval = CHAR_ERROR;
+        goto ret_point;
+    }
+
+    wchar_t *wdst = char_str_to_wchar(dst);
+    if (wdst == NULL) {
+        retval = CHAR_ERROR;
+        goto free_wsrc;
+    }
+
+    if (!CopyFile(wsrc, wdst, FALSE)) {
+        fprintf(stderr, "CopyFile Error: %lx\n", GetLastError());
+
+        retval = WRITE_ERROR;
+        goto free_wdst;
+    }
+
+free_wdst:
+    free(wdst);
+    wdst = NULL;
+free_wsrc:
+    free(wsrc);
+    wsrc = NULL;
+ret_point:
+    return retval;
+}
+
 int copy_with_win32(const char *dst, const char *src)
 {
     int retval = 0;
@@ -203,6 +236,8 @@ int main(int argc, char *argv[])
     if (string_ends_with(argv[0], "cpc.exe")) {
         return copy_with_libc(argv[2], argv[1]);
     } else if (string_ends_with(argv[0], "cpw32.exe")) {
+        return copy_with_win32(argv[2], argv[1]);
+    } else if (string_ends_with(argv[0], "cpw32s.exe")) {
         return copy_with_win32(argv[2], argv[1]);
     }
 
