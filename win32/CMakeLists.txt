@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 project(Win32API)
 
 include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_SYSTEM_NAME WINDOWS)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
