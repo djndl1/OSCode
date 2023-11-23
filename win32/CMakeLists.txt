@@ -79,6 +79,7 @@ add_executable(cat
 target_compile_definitions(cat
   PRIVATE UNICODE _UNICODE)
 target_link_directories(cat PRIVATE ${GNULIB_BINARY_DIR}/lib/)
+add_dependencies(cat gnulib)
 target_link_options(cat PRIVATE -mconsole -lgnu)
 
 add_executable(pwd
@@ -89,3 +90,6 @@ target_compile_definitions(pwd
   PRIVATE UNICODE _UNICODE)
 target_link_directories(pwd PRIVATE ${GNULIB_BINARY_DIR}/lib/)
 target_link_options(pwd PRIVATE -lgnu -mconsole -municode)
+add_dependencies(pwd gnulib)
+
+
