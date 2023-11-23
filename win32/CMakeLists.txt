@@ -24,7 +24,7 @@ add_compile_options(
 ExternalProject_Add(gnulib
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/gnulib/
   BINARY_DIR ${GNULIB_BINARY_DIR}
-  CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/lib/gnulib/configure
+  CONFIGURE_COMMAND ../../lib/gnulib/configure
   BUILD_COMMAND make
 )
 
