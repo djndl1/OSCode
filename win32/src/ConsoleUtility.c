@@ -39,7 +39,7 @@ bool print_string(HANDLE hOut, wchar_t const* msg)
     return print_strings(hOut, msg, nullptr);
 }
 
-bool console_prompt(wchar_t const* prompt_msg, wchar_t* response, DWORD max_char, bool echo)
+bool console_prompt(wchar_t const* prompt_msg, wchar_t* response, DWORD buf_len, bool echo)
 {
     bool retval = true;
     HANDLE hIn = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, 0,
@@ -63,10 +63,10 @@ bool console_prompt(wchar_t const* prompt_msg, wchar_t* response, DWORD max_char
     WINBOOL succeeded =
         SetConsoleMode(hIn, ENABLE_LINE_INPUT | (echo ? ENABLE_ECHO_INPUT : 0) | ENABLE_PROCESSED_INPUT)
         && SetConsoleMode(hOut, ENABLE_LINE_INPUT | ENABLE_PROCESSED_OUTPUT)
-        && ReadConsoleW(hIn, response, max_char - 2, &chars_read, nullptr); // 2 characters reserved for \r\l
+        && ReadConsoleW(hIn, response, buf_len - 1, &chars_read, nullptr); // one reserved for NULL
 
     if (succeeded) {
-        response[chars_read - 2] = L'\0'; // the final two characters are \r\l, discard them.
+        response[chars_read - 2] = L'\0'; // the final two read characters are CR and LF, discard them.
     } else {
         ReportError(L"console_prompt failure.", 0, TRUE);
     }
