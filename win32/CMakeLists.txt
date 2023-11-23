@@ -33,7 +33,7 @@ add_executable(CreateProcess
   lib/src/errors.cpp
   lib/src/processes.cpp)
 target_compile_definitions(CreateProcess
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x6000)
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
 target_link_options(CreateProcess
   PRIVATE -municode)
 
@@ -42,13 +42,13 @@ add_executable(ProcessIdentity
   lib/src/errors.cpp
   lib/src/processes.cpp)
 target_compile_definitions(ProcessIdentity
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x6000)
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0601)
 target_link_options(ProcessIdentity
   PRIVATE -municode)
 
 add_executable(cp src/cp.c)
 target_compile_definitions(cp
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x6000)
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
 target_link_options(cp PRIVATE -mconsole)
 
 add_custom_target(
