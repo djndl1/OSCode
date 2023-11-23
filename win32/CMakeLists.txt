@@ -93,3 +93,10 @@ target_link_options(pwd PRIVATE -lgnu -mconsole -municode)
 add_dependencies(pwd gnulib)
 
 
+add_executable(console_test
+  src/console_test.c)
+target_compile_definitions(console_test
+  PRIVATE UNICODE _UNICODE)
+target_link_directories(console_test PRIVATE ${GNULIB_BINARY_DIR}/lib/)
+target_link_options(console_test PRIVATE -lgnu -mconsole -municode)
+add_dependencies(console_test gnulib)
