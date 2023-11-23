@@ -4,8 +4,6 @@ project(Win32API)
 
 include(ExternalProject)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 17)
 set(CMAKE_SYSTEM_NAME WINDOWS)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -16,6 +14,13 @@ include_directories(
 
 set(GNULIB_BINARY_DIR ${CMAKE_BINARY_DIR}/gnulib)
 
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:C>:-std=c17>)
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
+
+# there's a problem on Windows that Git bash cannot properly redirect
+# a header to an output file, resulting in a build failure
 ExternalProject_Add(gnulib
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/gnulib/
   BINARY_DIR ${GNULIB_BINARY_DIR}
