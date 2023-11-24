@@ -67,10 +67,11 @@ int main(int argc, char* argv[])
     HANDLE hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
     bool dash_s = false; // whether not to show error
+    bool sequential = false;
 
     int c = -1;
     int shift = 0;
-    while ((c = getopt(argc, argv, "sm:")) != -1) {
+    while ((c = getopt(argc, argv, "sm:q")) != -1) {
         switch (c) {
             case 's':
                 dash_s = true;
@@ -83,6 +84,11 @@ int main(int argc, char* argv[])
 
                     return EXIT_FAILURE;
                 }
+            }
+            break;
+            case 'q':
+            {
+                sequential = true;
             }
             break;
             case ':':
@@ -98,8 +104,10 @@ int main(int argc, char* argv[])
     }
     for (int farg = optind; farg < argc; farg++) {
         wchar_t *in_file_name = char_str_to_wchar(argv[farg]);
-        HANDLE in_file = CreateFile(in_file_name, GENERIC_READ, 0,
-                                    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        HANDLE in_file = CreateFileW(in_file_name, GENERIC_READ, 0,
+                                    nullptr, OPEN_EXISTING,
+                                    FILE_ATTRIBUTE_NORMAL | (sequential ? FILE_FLAG_SEQUENTIAL_SCAN : 0),
+                                    nullptr);
         if (in_file == INVALID_HANDLE_VALUE) {
             if (!dash_s) {
                 ReportError(L"Error: file does not exist", 0, true);
