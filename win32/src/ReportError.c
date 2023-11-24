@@ -31,3 +31,14 @@ VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printErrorMessage)
                 ExitProcess(exitCode);
         return;
 }
+
+void ReportException(LPCTSTR userMessage, DWORD exceptionCode)
+{
+        ReportError(userMessage, 0, TRUE);
+        if (exceptionCode != 0) {
+                // leave bit 28 alone
+                RaiseException((0x0FFFFFFF & exceptionCode) | 0xE000000, 0, 0, NULL);
+        }
+
+        return;
+}
