@@ -20,3 +20,8 @@ include_directories(
 add_executable(toupper
   to_upper.cc
   ../src/ReportError.c)
+
+
+add_executable(except_gen
+  except_gen.cpp
+  ../src/ReportError.c)
