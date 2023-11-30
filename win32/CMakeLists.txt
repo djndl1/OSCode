@@ -100,3 +100,9 @@ target_compile_definitions(console_test
 target_link_directories(console_test PRIVATE ${GNULIB_BINARY_DIR}/lib/)
 target_link_options(console_test PRIVATE -lgnu -mconsole -municode)
 add_dependencies(console_test gnulib)
+
+add_executable(console_ctrl
+  src/console_ctrl.c)
+target_compile_definitions(console_ctrl
+  PRIVATE UNICODE _UNICODE)
+target_link_options(console_ctrl PRIVATE -mconsole -municode)
