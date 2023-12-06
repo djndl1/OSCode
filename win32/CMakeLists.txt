@@ -106,3 +106,9 @@ add_executable(console_ctrl
 target_compile_definitions(console_ctrl
   PRIVATE UNICODE _UNICODE)
 target_link_options(console_ctrl PRIVATE -mconsole -municode)
+
+add_executable(system_info
+  src/system_info.c)
+target_compile_definitions(system_info
+  PRIVATE UNITCODE _UNICODE _WIN32_WINNT=0x0600)
+target_link_options(system_info PRIVATE -mconsole -municode)
