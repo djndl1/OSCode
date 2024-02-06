@@ -24,7 +24,7 @@ add_compile_options(
 ExternalProject_Add(gnulib
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/gnulib/
   BINARY_DIR ${GNULIB_BINARY_DIR}
-  CONFIGURE_COMMAND ../../lib/gnulib/configure
+  CONFIGURE_COMMAND AR=${CMAKE_AR} CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} ../../lib/gnulib/configure --host=${HOST_TRIPLET} --build=${BUILD_TRIPLET}
   BUILD_COMMAND make
 )
 

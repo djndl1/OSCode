@@ -1,0 +1,5 @@
+set(CMAKE_C_COMPILER aarch64-w64-mingw32-gcc)
+set(CMAKE_CXX_COMPILER aarch64-w64-mingw32-g++)
+set(CMAKE_AR aarch64-w64-mingw32-ar)
+set(BUILD_TRIPLET aarch64-linux-gnu)
+set(HOST_TRIPLET aarch64-w64-mingw32)
