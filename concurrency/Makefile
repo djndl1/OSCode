@@ -18,7 +18,8 @@ BUILDDIR=builddir
 
 OUTPUT_EXE=$(BUILDDIR)/SimpleThread.class \
 		$(BUILDDIR)/SimpleThreadWin32.exe \
-		$(BUILDDIR)/SimpleThreadPosix
+		$(BUILDDIR)/SimpleThreadPosix \
+		$(BUILDDIR)/RunSimpleThread.exe
 
 
 .PHONY: all
@@ -36,6 +37,9 @@ $(BUILDDIR)/SimpleThreadWin32.exe: SimpleThreadWin32.cc $(BUILDDIR) mingw_runtim
 
 $(BUILDDIR)/SimpleThreadPosix: SimpleThreadPosix.cc $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) -o $@ $<
+
+$(BUILDDIR)/RunSimpleThread.exe: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh $(BUILDDIR)
+	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) -o $@ $< SimpleThread.cc
 
 $(BUILDDIR)/%.class: %.java
 	$(JAVAC) $(JAVA_FLAGS) $< -d $(BUILDDIR)
