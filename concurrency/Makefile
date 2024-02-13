@@ -9,15 +9,20 @@ CXXFLAGS=-g -Wall
 CC=gcc
 CFLAGS=-g -Wall
 MINGW_FLAGS=-DUNICODE -D_UNICODE
+POSIX_FLAGS=-pthread
 
 JAVAC=javac
 JAVA_FLAGS=-g -Xlint
 
 BUILDDIR=builddir
 
+OUTPUT_EXE=$(BUILDDIR)/SimpleThread.class \
+		$(BUILDDIR)/SimpleThreadWin32.exe \
+		$(BUILDDIR)/SimpleThreadPosix
+
+
 .PHONY: all
-all: $(BUILDDIR)/SimpleThread.class \
-	$(BUILDDIR)/SimpleThreadWin32.exe
+all: $(OUTPUT_EXE)
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -29,6 +34,9 @@ mingw_runtime:
 $(BUILDDIR)/SimpleThreadWin32.exe: SimpleThreadWin32.cc $(BUILDDIR) mingw_runtime
 	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) -o $@ $<
 
+$(BUILDDIR)/SimpleThreadPosix: SimpleThreadPosix.cc $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) -o $@ $<
+
 $(BUILDDIR)/%.class: %.java
 	$(JAVAC) $(JAVA_FLAGS) $< -d $(BUILDDIR)
 
@@ -38,3 +46,4 @@ clean:
 	-rm -rf $(BUILDDIR)/*.o
 	-rm -rf $(BUILDDIR)/*.obj
 	-rm -rf $(BUILDDIR)/*.exe
+	-rm -rf $(OUTPUT_EXE)
