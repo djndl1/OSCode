@@ -1,10 +1,11 @@
 #include "SimpleThread.hh"
 
-
-#ifdef WIN32_IMPL
 #include <iostream>
 #include <string>
+#include <utility>
+#include <cstdint>
 
+#ifdef WIN32_IMPL
 #include <process.h>
 
 Win32Thread::Win32Thread(std::unique_ptr<Runnable> runnable)
@@ -67,13 +68,19 @@ void Win32Thread::start()
 Win32Thread::~Win32Thread()
 {
     if (m_thread_id != ::GetCurrentThreadId()) {
-
+        DWORD rc = ::CloseHandle(m_thread_handle);
+        if (rc == 0) {
+            print_error("CloseHandle failed at", __FILE__, __LINE__);
+        }
     }
 }
 
 void *Win32Thread::join()
 {
-    // TODO
+    DWORD rc = ::WaitForSingleObject(m_thread_handle, INFINITE);
+    if (rc != WAIT_OBJECT_0) {
+        print_error("WaitForSingleObject failed at ", __FILE__, __LINE__);
+    }
     return result;
 }
 
@@ -103,4 +110,121 @@ void Win32Thread::print_error(const std::string& msg,
 
 #else
 
+#include <error.h>
+#include <string.h>
+
+PosixThread::PosixThread(std::unique_ptr<Runnable> runnable, bool detached)
+    : m_detached{detached}, m_runnable{std::move(runnable)}
+{
+    if (!m_runnable) {
+        print_error("PosixThread::PosixThread(std::unique_ptr<Runnable>, bool) failed at ",
+                    EINVAL, __FILE__, __LINE__);
+    }
+}
+
+PosixThread::PosixThread(bool detached)
+    : m_detached{detached}, m_runnable{nullptr}
+{ }
+
+PosixThread::~PosixThread()
+{ }
+
+void *PosixThread::start_thread_runnable(void *args)
+{
+    PosixThread *this_thread = static_cast<PosixThread*>(args);
+    if (!this_thread->m_runnable) {
+        print_error("No runnable: ", ENOTSUP, __FILE__, __LINE__);
+    }
+
+    this_thread->result = this_thread->m_runnable->run();
+    this_thread->set_completed();
+
+    return this_thread->result;
+}
+
+void *PosixThread::start_thread(void *args)
+{
+    PosixThread *this_thread = static_cast<PosixThread*>(args);
+    this_thread->result = this_thread->run();
+    this_thread->set_completed();
+
+    return this_thread->result;
+}
+
+void PosixThread::start()
+{
+    pthread_attr_t thread_attr;
+    int attr_status = ::pthread_attr_init(&thread_attr);
+    if (attr_status != 0) {
+        print_error("pthread_attr_init() failed at ", attr_status, __FILE__, __LINE__);
+    }
+
+    if (m_detached) {
+        int detach_status = ::pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+        if (detach_status != 0) {
+            print_error("pthread_attr_setdetachstate() failed at ", detach_status, __FILE__, __LINE__);
+        }
+    }
+
+    int thread_creation_status = ::pthread_create(&m_thread_handle, &thread_attr,
+                                                  m_runnable ? start_thread_runnable : start_thread,
+                                                  reinterpret_cast<void*>(this));
+    if (thread_creation_status != 0) {
+        print_error("pthread_create failed at ", thread_creation_status, __FILE__, __LINE__);
+    }
+    int attr_destroy_status = ::pthread_attr_destroy(&thread_attr);
+    if (attr_destroy_status != 0) {
+        print_error("pthread_attr_destroy failed at ", thread_creation_status, __FILE__, __LINE__);
+    }
+}
+
+void *PosixThread::join()
+{
+    int status = ::pthread_join(m_thread_handle, nullptr);
+    if (status != 0) {
+        print_error("pthread_join failed at", status, __FILE__, __LINE__);
+    }
+
+    return result;
+}
+
+void PosixThread::set_completed()
+{ }
+
+
+void PosixThread::print_error(const char *message, int errcode, const char *filename, int linenum)
+{
+    std::cerr << message << " failed at line " << linenum << " in " << filename
+               << " with error " << errcode  << ":" << ::strerror(errcode);
+
+    ::exit(errcode);
+}
+
 #endif
+
+Thread::Thread(std::unique_ptr<Runnable> runnable)
+    : p_thread_impl{new ThreadImpl(std::move(runnable))}
+{ }
+
+Thread::Thread()
+    : p_thread_impl{new ThreadImpl()}
+{}
+
+
+Thread::~Thread()
+{
+    delete p_thread_impl;
+}
+
+void Thread::start()
+{
+    std::function<void*()> wrapper = std::bind(&Thread::run, this);
+
+    p_thread_impl->setup_run_func(wrapper);
+    p_thread_impl->start();
+}
+
+void *Thread::join()
+{
+    return p_thread_impl->join();
+}

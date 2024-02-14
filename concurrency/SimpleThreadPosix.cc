@@ -14,7 +14,7 @@ using std::string;
 static void print_error(const char *message, int errcode, const char *filename, int linenum)
 {
     std::cerr << message << " failed at line " << linenum << " in " << filename
-               << " with error " << errcode  << L":" << ::strerror(errcode);
+               << " with error " << errcode  << ":" << ::strerror(errcode);
 
     ::exit(errcode);
 }

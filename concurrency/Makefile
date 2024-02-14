@@ -5,9 +5,9 @@ MINGW_CXX=$(MINGW_BINARY_DIR)/$(MINGW_TRIPLET)-g++
 MINGW_CC=$(MINGW_BINARY_DIR)/$(MINGW_TRIPLET)-gcc
 
 CXX=g++
-CXXFLAGS=-g -Wall
+CXXFLAGS=-g -Wall -std=c++17
 CC=gcc
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -std=c17
 MINGW_FLAGS=-DUNICODE -D_UNICODE
 POSIX_FLAGS=-pthread
 
@@ -19,7 +19,8 @@ BUILDDIR=builddir
 OUTPUT_EXE=$(BUILDDIR)/SimpleThread.class \
 		$(BUILDDIR)/SimpleThreadWin32.exe \
 		$(BUILDDIR)/SimpleThreadPosix \
-		$(BUILDDIR)/RunSimpleThread.exe
+		$(BUILDDIR)/RunSimpleThread.exe \
+		$(BUILDDIR)/RunSimpleThread
 
 
 .PHONY: all
@@ -40,6 +41,9 @@ $(BUILDDIR)/SimpleThreadPosix: SimpleThreadPosix.cc $(BUILDDIR)
 
 $(BUILDDIR)/RunSimpleThread.exe: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh $(BUILDDIR)
 	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) -o $@ $< SimpleThread.cc
+
+$(BUILDDIR)/RunSimpleThread: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) -o $@ $< SimpleThread.cc
 
 $(BUILDDIR)/%.class: %.java
 	$(JAVAC) $(JAVA_FLAGS) $< -d $(BUILDDIR)
