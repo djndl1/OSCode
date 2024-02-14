@@ -77,11 +77,14 @@ Win32Thread::~Win32Thread()
 
 void *Win32Thread::join()
 {
-    DWORD rc = ::WaitForSingleObject(m_thread_handle, INFINITE);
-    if (rc != WAIT_OBJECT_0) {
-        print_error("WaitForSingleObject failed at ", __FILE__, __LINE__);
+    if (m_thread_id != ::GetCurrentThreadId()) {
+        DWORD rc = ::WaitForSingleObject(m_thread_handle, INFINITE);
+        if (rc != WAIT_OBJECT_0) {
+            print_error("WaitForSingleObject failed at ", __FILE__, __LINE__);
+        }
+        return result;
     }
-    return result;
+    throw std::runtime_error("A thread may not join itself");
 }
 
 void Win32Thread::set_completed()
@@ -181,6 +184,8 @@ void PosixThread::start()
 void *PosixThread::join()
 {
     int status = ::pthread_join(m_thread_handle, nullptr);
+    if (status == EDEADLK)
+        throw std::runtime_error("A thread may not join itself");
     if (status != 0) {
         print_error("pthread_join failed at", status, __FILE__, __LINE__);
     }
