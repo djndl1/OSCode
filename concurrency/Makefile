@@ -8,6 +8,7 @@ CXX=g++
 CXXFLAGS=-g -Wall -std=c++17
 CC=gcc
 CFLAGS=-g -Wall -std=c17
+LDFLAGS=
 MINGW_FLAGS=-DUNICODE -D_UNICODE
 POSIX_FLAGS=-pthread
 
@@ -20,30 +21,34 @@ OUTPUT_EXE=$(BUILDDIR)/SimpleThread.class \
 		$(BUILDDIR)/SimpleThreadWin32.exe \
 		$(BUILDDIR)/SimpleThreadPosix \
 		$(BUILDDIR)/RunSimpleThread.exe \
-		$(BUILDDIR)/RunSimpleThread
+		$(BUILDDIR)/RunSimpleThread \
+		$(BUILDDIR)/CommunicatingThread
 
 
 .PHONY: all
-all: $(OUTPUT_EXE)
+all: $(BUILDDIR) $(OUTPUT_EXE) mingw_runtime
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 .PHONY: mingw_runtime
-mingw_runtime:
+mingw_runtime: $(BUILDDIR)
 	cp $(MINGW_DIR)/$(MINGW_TRIPLET)/bin/*.dll $(BUILDDIR)
 
-$(BUILDDIR)/SimpleThreadWin32.exe: SimpleThreadWin32.cc $(BUILDDIR) mingw_runtime
-	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) -o $@ $<
+$(BUILDDIR)/SimpleThreadWin32.exe: SimpleThreadWin32.cc
+	$(MINGW_CXX) $(CXXFLAGS) $(LDFLAGS) $(MINGW_FLAGS) -o $@ $<
 
-$(BUILDDIR)/SimpleThreadPosix: SimpleThreadPosix.cc $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) -o $@ $<
+$(BUILDDIR)/SimpleThreadPosix: SimpleThreadPosix.cc
+	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) $(LDFLAGS) -o $@ $<
 
-$(BUILDDIR)/RunSimpleThread.exe: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh $(BUILDDIR)
-	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) -o $@ $< SimpleThread.cc
+$(BUILDDIR)/RunSimpleThread.exe: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh
+	$(MINGW_CXX) $(CXXFLAGS) $(MINGW_FLAGS) $(LDFLAGS) -o $@ $< SimpleThread.cc
 
-$(BUILDDIR)/RunSimpleThread: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) -o $@ $< SimpleThread.cc
+$(BUILDDIR)/RunSimpleThread: RunSimpleThread.cc SimpleThread.cc SimpleThread.hh
+	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) $(LDFLAGS) -o $@ $< SimpleThread.cc
+
+$(BUILDDIR)/CommunicatingThread: CommunicatingThread.cc SimpleThread.cc SimpleThread.hh 
+	$(CXX) $(CXXFLAGS) $(POSIX_FLAGS) $(LDFLAGS) -o $@ $< SimpleThread.cc
 
 $(BUILDDIR)/%.class: %.java
 	$(JAVAC) $(JAVA_FLAGS) $< -d $(BUILDDIR)
@@ -55,3 +60,4 @@ clean:
 	-rm -rf $(BUILDDIR)/*.obj
 	-rm -rf $(BUILDDIR)/*.exe
 	-rm -rf $(OUTPUT_EXE)
+	-rm -rf $(BUILDDIR)/mingw_runtime
