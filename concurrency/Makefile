@@ -1,4 +1,4 @@
-MINGW_TRIPLET=aarch64-w64-mingw32
+MINGW_TRIPLET=$(shell uname -m)-w64-mingw32
 MINGW_DIR=$(HOME)/opt/llvm-mingw
 MINGW_BINARY_DIR=$(MINGW_DIR)/bin
 MINGW_CXX=$(MINGW_BINARY_DIR)/$(MINGW_TRIPLET)-g++
