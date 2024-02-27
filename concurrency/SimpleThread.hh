@@ -174,7 +174,7 @@ class Thread : public ThreadBase
 
         virtual ~Thread();
     private:
-        ThreadImpl *p_thread_impl;
+        const std::unique_ptr<ThreadImpl> p_thread_impl;
 
         virtual void *run() { return nullptr; }
 };

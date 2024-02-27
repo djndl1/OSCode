@@ -216,10 +216,7 @@ Thread::Thread()
 {}
 
 
-Thread::~Thread()
-{
-    delete p_thread_impl;
-}
+Thread::~Thread() = default;
 
 void Thread::start()
 {
