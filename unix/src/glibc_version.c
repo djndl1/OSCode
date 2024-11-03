@@ -1,6 +1,8 @@
+#include "utest.h"
+#include <features.h>
+#ifdef __GLIBC__
 #include <gnu/libc-version.h>
 
-#include "utest.h"
 
 UTEST(GLIBC, RUNTIME_VERSION)
 {
@@ -14,5 +16,7 @@ UTEST(GLIBC, TARGET_VERSION) {
     printf("target glibc version: %d.%d\n",
            __GLIBC__, __GLIBC_MINOR__);
 }
+#endif
 
 UTEST_MAIN();
+
