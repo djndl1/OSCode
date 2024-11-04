@@ -150,4 +150,52 @@ UTEST(FILEIO, BUF_EFFICIENCY)
     }
 }
 
+UTEST(FILEIO, APPEND_ALWAYS)
+{
+    const char *append_file = getenv("FILEIO_TEST_APPEND");
+    if (append_file == NULL) {
+        ASSERT_FALSE_MSG(true, "failed to get test append file");
+    }
+
+    int fd = -1;
+    if ((fd = open(append_file, O_CREAT | O_APPEND | O_RDWR, S_IRWXU | S_IRWXG)) == -1) {
+        goto ret;
+    }
+
+    if (write(fd, "ABC", 3) < 3) {
+        fprintf(stderr, "failed to write ABC\n");
+        goto close_file;
+    }
+
+    if (lseek(fd, 0, SEEK_SET) > 0) {
+        fprintf(stderr, "failed to seek to the beginning\n");
+        goto close_file;
+    }
+
+    if (write(fd, "abc", 3) < 3) {
+        fprintf(stderr, "failed to write abc\n");
+        goto close_file;
+    }
+
+    if (lseek(fd, 0, SEEK_SET) > 0) {
+        fprintf(stderr, "failed to seek to the beginning\n");
+        goto close_file;
+    }
+
+    char buf[10] = { '\0' };
+    if (read(fd, buf, 6) != 6) {
+        fprintf(stderr, "failed to read all bytes\n");
+        goto close_file;
+    }
+
+    ASSERT_EQ_MSG(strcmp("ABCabc", buf), 0, buf);
+
+close_file:
+    if (fd != -1) {
+        close(fd);
+    }
+ret:
+    return;
+}
+
 UTEST_MAIN();
