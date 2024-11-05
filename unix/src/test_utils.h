@@ -20,4 +20,6 @@ clock_t stopwatch_elapsed_clocks(const stopwatch_t *self);
 
 double stopwatch_elapsed_seconds(const stopwatch_t *self);
 
+int print_error(int error, const char *fmt, ...);
+
 #endif // TEST_UTILS_H_
