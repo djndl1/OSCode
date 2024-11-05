@@ -12,6 +12,7 @@
 #include <time.h>
 
 #include "test_utils.h"
+#include "file_desc.h"
 
 UTEST(FILE_IO, OPENMAX)
 {
@@ -30,13 +31,15 @@ UTEST(FILE_IO, OFFSET_T)
 
 UTEST(FILE_IO, HOLE)
 {
-    int fd = -1;
-
-    if ((fd = open("file.hole", O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG)) < 0) {
-        perror("open error");
+    file_desc_result_t result = file_create("file.hole",
+                                            O_RDWR | O_TRUNC,
+                                            S_IRWXU | S_IRWXG);
+    if (result.error != 0) {
+        print_error(result.error, "open error");
         ASSERT_FALSE_MSG(true, "failed to open: bailing out");
     }
 
+    int fd = result.fd.fd;
     if ((write(fd, "ABC", 3)) != 3) {
         ASSERT_FALSE_MSG(true, "failed to write initial data, bailing out");
     }
