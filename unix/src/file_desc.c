@@ -47,7 +47,7 @@ file_desc_result_t file_create(const char *pathname, int flags, mode_t modes)
     return file_create_impl(pathname, flags, modes, false);
 }
 
-file_desc_result_t file_open_at(const file_desc_t dir, const char *pathanem, int flags)
+file_desc_result_t file_open_at(const file_desc_t dir, const char *pathname, int flags)
 {
     return (file_desc_result_t){ .error = ENOSYS };
 }
@@ -55,4 +55,103 @@ file_desc_result_t file_open_at(const file_desc_t dir, const char *pathanem, int
 file_desc_result_t file_create_at(const file_desc_t dir, const char *pathanem, int flags)
 {
     return (file_desc_result_t){ .error = ENOSYS };
+}
+
+file_read_result_t file_read_into(const file_desc_t self, data_buffer_t buffer)
+{
+    if (buffer.data == NULL || buffer.length == 0) {
+        return (file_read_result_t) { .error = EINVAL };
+    }
+
+    ssize_t n = read(self.fd, buffer.data, buffer.length);
+    if (n == -1) {
+        return (file_read_result_t) { .error = errno };
+    }
+
+    return (file_read_result_t) { .error = 0, .read_count = n, .buffer = buffer };
+}
+
+file_read_result_t file_read(const file_desc_t self, size_t count)
+{
+    if (count == 0) {
+        return (file_read_result_t) { 0 };
+    }
+
+    allocation_result_t alloc_result = std_allocate(count);
+    if (alloc_result.error != 0) {
+        return (file_read_result_t) { .error = alloc_result.error };
+    }
+    data_buffer_t buf = alloc_result.buffer;
+
+    file_read_result_t result = { 0 };
+
+    file_read_result_t buf_result = file_read_into(self, buf);
+    if (buf_result.error != 0) {
+        result.error = buf_result.error;
+        result.read_count = 0;
+        goto deallocate_buf;
+    }
+
+    if (buf_result.read_count < buf.length) {
+        error_t e = data_buffer_resize(buf, buf_result.read_count);
+        if (e.error != 0) {
+            result.error = buf_result.error;
+            result.read_count = 0;
+            goto deallocate_buf;
+        }
+    }
+
+    result.error = 0;
+    result.read_count = buf_result.read_count;
+    result.buffer = buf;
+    goto ret;
+
+deallocate_buf:
+    std_deallocate(buf);
+ret:
+    return result;
+}
+
+file_write_result_t file_write(const file_desc_t self, const data_buffer_t buf)
+{
+    file_write_result_t result = { .error = 0, .written_count = 0 };
+    if (buf.data == NULL || buf.length == 0) {
+        result.error = EINVAL;
+        return result;
+    }
+
+    ssize_t n = write(self.fd, buf.data, buf.length);
+    if (n == -1) {
+        result.error = errno;
+        return result;
+    }
+
+    result.written_count = n;
+    result.error = 0;
+    return result;
+}
+
+file_seek_result_t file_seek(const file_desc_t self, const file_seek_target_t target)
+{
+    file_seek_result_t result = { .error = 0, .offset = -1 };
+
+    off_t of = lseek(self.fd, target.offset, target.whence);
+    if (of == -1) {
+        result.error = errno;
+        return result;
+    }
+
+    result.offset = of;
+    result.error = 0;
+    return result;
+}
+
+error_t file_close(const file_desc_t self)
+{
+    int e = close(self.fd);
+    if (e == -1) {
+        return ERROR(e);
+    }
+
+    return E_OK;
 }
