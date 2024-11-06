@@ -38,21 +38,24 @@ UTEST(FILE_IO, HOLE)
         print_error(result.error, "open error");
         ASSERT_FALSE_MSG(true, "failed to open: bailing out");
     }
+    file_desc_t file = result.fd;
 
-    int fd = result.fd.fd;
-    if ((write(fd, "ABC", 3)) != 3) {
+    file_write_result_t write_result = file_write(file,
+                                                  DATA_BUFFER("ABC", 3));
+    if (write_result.error != 0 || write_result.written_count != 3) {
         ASSERT_FALSE_MSG(true, "failed to write initial data, bailing out");
     }
 
-    if (lseek(fd, 200000, SEEK_CUR) == -1) {
+    if (file_seek(file, SEEK_FROM_END(20000)).error != 0) {
         ASSERT_FALSE_MSG(true, "failed to seek to the next position, bailing out");
     }
 
-    if ((write(fd, "abc", 3)) != 3) {
+    write_result = file_write(file, DATA_BUFFER("abc", 3));
+    if (write_result.error != 0 || write_result.written_count != 3) {
         ASSERT_FALSE_MSG(true, "failed to write the second batch of data, bailing out");
     }
 
-    close(fd);
+    file_close(file);
 }
 
 UTEST(FILEIO, ILP_OFF)
@@ -160,43 +163,58 @@ UTEST(FILEIO, APPEND_ALWAYS)
         ASSERT_FALSE_MSG(true, "failed to get test append file");
     }
 
-    int fd = -1;
-    if ((fd = open(append_file, O_CREAT | O_APPEND | O_RDWR, S_IRWXU | S_IRWXG)) == -1) {
+    file_desc_result_t open_result = file_create(append_file, O_APPEND | O_RDWR, S_IRWXU | S_IRWXG);
+    if (open_result.error != 0) {
         goto ret;
     }
+    file_desc_t file = open_result.fd;
 
-    if (write(fd, "ABC", 3) < 3) {
+    if (file_write(file, DATA_BUFFER("ABC", 3)).written_count < 3) {
         fprintf(stderr, "failed to write ABC\n");
         goto close_file;
     }
 
-    if (lseek(fd, 0, SEEK_SET) > 0) {
+    if (file_seek(file, SEEK_FROM_BEGINNING(0)).offset > 0) {
         fprintf(stderr, "failed to seek to the beginning\n");
         goto close_file;
     }
 
-    if (write(fd, "abc", 3) < 3) {
+    if (file_write(file, DATA_BUFFER("abc", 3)).written_count < 3) {
         fprintf(stderr, "failed to write abc\n");
         goto close_file;
     }
 
-    if (lseek(fd, 0, SEEK_SET) > 0) {
+    if (file_seek(file, SEEK_FROM_BEGINNING(0)).offset > 0) {
         fprintf(stderr, "failed to seek to the beginning\n");
         goto close_file;
     }
 
-    char buf[10] = { '\0' };
-    if (read(fd, buf, 6) != 6) {
+    data_buffer_t buf = { 0 };
+    bool failed_read = false;
+    scoped (buf = file_read(file, 6).buffer, std_deallocate(buf)) {
+        if (buf.length < 6) {
+            failed_read = true;
+            break;
+        }
+
+        error_t e = data_buffer_resize(buf, 7);
+        if (e.error != 0) {
+            //print_error(e.error, "Bytes read, resize failed\n");
+            fprintf(stderr, "Bytes read, resize failed: %s, %d\n", strerror(e.error), e.error);
+            goto close_file;
+        }
+        byte_buffer_at(buf, 6) = '\0';
+    }
+
+    if (failed_read) {
         fprintf(stderr, "failed to read all bytes\n");
         goto close_file;
     }
 
-    ASSERT_EQ_MSG(strcmp("ABCabc", buf), 0, buf);
+    ASSERT_EQ_MSG(strcmp("ABCabc", (char*)buf.data), 0, (char*)buf.data);
 
 close_file:
-    if (fd != -1) {
-        close(fd);
-    }
+    file_close(file);
 ret:
     return;
 }
