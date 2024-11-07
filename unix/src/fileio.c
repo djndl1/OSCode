@@ -91,45 +91,56 @@ clock_errno_t write_efficiency_test(size_t bufsize)
         result.error = EINVAL;
         goto ret_result;
     }
-    fprintf(stderr, "reading %s\n", input_file);
 
-    int input_fd = open(input_file, O_RDONLY);
-    if (input_fd == -1) {
-        result.error = errno;
+    file_desc_result_t input_fd = file_open(input_file, O_RDONLY);
+    if (input_fd.error != 0) {
+        result.error = input_fd.error;
         goto ret_result;
     }
+    file_desc_t file = input_fd.fd;
 
-    void *buf = malloc(bufsize);
-    if (buf == NULL) {
-        result.error = errno;
-        goto close_input;
-    }
+    deferred(file_close(file)) {
 
-    stopwatch_t sw = stopwatch_new();
-    stopwatch_start(&sw);
-    int n = 0;
-    while ((n = read(input_fd, buf, bufsize)) > 0) {
-        if (write(STDOUT_FILENO, buf, n) != n) {
-            result.error = errno;
-            goto ret_result;
+        allocation_result_t alloc_res = std_allocate(bufsize);
+        if (alloc_res.error != 0) {
+            result.error = alloc_res.error;
+            goto end_of_file_block;
         }
+        stopwatch_t sw = stopwatch_new();
+
+        bool io_op_error = false;
+        data_buffer_t buf;
+        scoped(buf = alloc_res.buffer, std_deallocate(buf)) {
+            stopwatch_start(&sw);
+
+            file_read_result_t read_res = { 0 };
+            while ((read_res = file_read_into(file, buf)),
+                   read_res.error == 0 && read_res.read_count > 0) {
+                if (file_write_until(fd_stdout, buf, read_res.read_count).written_count != read_res.read_count) {
+                    // write error
+                    result.error = errno;
+                    io_op_error = true;
+                    goto end_of_buf_block;
+                }
+            }
+
+            // read error
+            if (read_res.error != 0) {
+                result.error = read_res.error;
+                io_op_error = true;
+                break;
+            }
+        end_of_buf_block: ;
+        }
+
+        if (!io_op_error) {
+            stopwatch_stop(&sw);
+            result.time = stopwatch_elapsed_clocks(&sw);
+        }
+
+    end_of_file_block: ;
     }
 
-    if (n < 0) {
-        result.error = errno;
-        goto ret_result;
-    }
-    stopwatch_stop(&sw);
-    result.time = stopwatch_elapsed_clocks(&sw);
-
-deallocate_buf:
-    if (!buf) {
-        free(buf);
-    }
-close_input:
-    if (input_fd >= 0) {
-        close(input_fd);
-    }
 ret_result:
     return result;
 }
@@ -145,8 +156,7 @@ UTEST(FILEIO, BUF_EFFICIENCY)
         size_t bufsize = bufsizes[i];
         clock_errno_t result = write_efficiency_test(bufsize);
         if (result.error) {
-            const char *err_msg = strerror(result.error);
-            fprintf(stderr, "bufsize %zu error: %s\n", bufsize, err_msg);
+            print_error(result.error, "bufsize %zu \n", bufsize);
             continue;
         }
         double elapsed_secs = ((double)result.time / CLOCKS_PER_SEC);
@@ -199,7 +209,6 @@ UTEST(FILEIO, APPEND_ALWAYS)
 
         error_t e = data_buffer_resize(buf, 7);
         if (e.error != 0) {
-            //print_error(e.error, "Bytes read, resize failed\n");
             fprintf(stderr, "Bytes read, resize failed: %s, %d\n", strerror(e.error), e.error);
             goto close_file;
         }
@@ -211,7 +220,9 @@ UTEST(FILEIO, APPEND_ALWAYS)
         goto close_file;
     }
 
-    ASSERT_EQ_MSG(strcmp("ABCabc", (char*)buf.data), 0, (char*)buf.data);
+    const data_buffer_t actual_stored_data = DATA_BUFFER("ABCabc", 6);
+    ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
+                    (char*)buf.data);
 
 close_file:
     file_close(file);
