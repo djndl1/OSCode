@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <stdbool.h>
 #include "util.h"
+#include "errors.h"
 
 typedef struct {
     void *data;
@@ -22,6 +24,8 @@ typedef struct {
     int error;
     data_buffer_t buffer;
 } allocation_result_t;
+
+bool data_buffer_compare(const data_buffer_t self, data_buffer_t other, size_t count);
 
 error_t data_buffer_resize(data_buffer_t self, size_t newsize);
 
