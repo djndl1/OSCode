@@ -3,8 +3,6 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#define FILE_DESC(fd) ((file_desc_t){ .fd = fd })
-
 file_desc_result_t file_open(const char *pathname, int flags)
 {
     file_desc_result_t result = { .fd = { -1 }, .error = 0 };
@@ -112,15 +110,25 @@ ret:
     return result;
 }
 
-file_write_result_t file_write(const file_desc_t self, const data_buffer_t buf)
+file_write_result_t file_write(const file_desc_t self,
+                               const data_buffer_t buf)
+{
+    return file_write_until(self, buf, buf.length);
+}
+
+file_write_result_t file_write_until(const file_desc_t self,
+                                     const data_buffer_t buf,
+                                     size_t count)
 {
     file_write_result_t result = { .error = 0, .written_count = 0 };
-    if (buf.data == NULL || buf.length == 0) {
+    if (buf.data == NULL || buf.length == 0 || count == 0) {
         result.error = EINVAL;
         return result;
     }
 
-    ssize_t n = write(self.fd, buf.data, buf.length);
+    size_t nwrite = MIN(buf.length, count);
+
+    ssize_t n = write(self.fd, buf.data, nwrite);
     if (n == -1) {
         result.error = errno;
         return result;

@@ -12,6 +12,11 @@ typedef struct {
     int fd;
 } file_desc_t;
 
+#define FILE_DESC(fd) ((file_desc_t) { fd })
+#define fd_stdin FILE_DESC(STDIN_FILENO)
+#define fd_stdout FILE_DESC(STDOUT_FILENO)
+#define fd_stderr FILE_DESC(STDERR_FILENO)
+
 typedef struct {
     int error;
     file_desc_t fd;
@@ -52,9 +57,13 @@ file_desc_result_t file_open_at(const file_desc_t dir, const char *pathanem, int
 
 file_desc_result_t file_create_at(const file_desc_t dir, const char *pathanem, int flags);
 
+file_read_result_t file_read_into(const file_desc_t self, data_buffer_t buffer);
+
 file_read_result_t file_read(const file_desc_t, size_t);
 
 file_write_result_t file_write(const file_desc_t, const data_buffer_t);
+
+file_write_result_t file_write_until(const file_desc_t, const data_buffer_t, size_t count);
 
 file_seek_result_t file_seek(const file_desc_t, const file_seek_target_t);
 
