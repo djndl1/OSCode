@@ -83,7 +83,7 @@ file_read_result_t file_read(const file_desc_t self, size_t count)
         return (file_read_result_t) { 0 };
     }
 
-    allocation_result_t alloc_result = std_allocate(count);
+    buffer_alloc_result_t alloc_result = std_allocate_buffer(count);
     if (alloc_result.error != 0) {
         return (file_read_result_t) { .error = alloc_result.error };
     }
@@ -113,7 +113,7 @@ file_read_result_t file_read(const file_desc_t self, size_t count)
     goto ret;
 
 deallocate_buf:
-    std_deallocate(buf);
+    data_buffer_deallocate(buf);
 ret:
     return result;
 }

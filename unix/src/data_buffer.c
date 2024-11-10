@@ -3,41 +3,62 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "errors.h"
 
 
-allocation_result_t std_allocate(size_t count)
+buffer_alloc_result_t std_allocate_buffer(size_t count)
 {
-    allocation_result_t result = {
+    return data_buffer_new(count, std_allocator);
+}
+
+buffer_alloc_result_t data_buffer_new(size_t count, const allocator_t *allocator)
+{
+    buffer_alloc_result_t result = {
     .error = 0,
     .buffer = {
         .data = NULL,
         .length = 0,
+        .allocator = NULL,
         }
     };
-    void *data = malloc(count);
-    if (data == NULL) {
-        result.error = errno;
+
+    if (allocator == NULL || allocator->allocate == NULL) {
+        result.error = EINVAL;
+        return result;
+    }
+
+    mem_alloc_result_t mem_res = allocator->allocate(allocator, count);
+    if (mem_res.error != 0) {
+        result.error = mem_res.error;
         return result;
     }
 
     result.error = 0;
-    result.buffer = DATA_BUFFER(data, count);
+    result.buffer.data = mem_res.mem;
+    result.buffer.length = count;
+    result.buffer.allocator = allocator;
 
     return result;
 }
 
-void std_deallocate(data_buffer_t buf)
+void data_buffer_deallocate(data_buffer_t buf)
 {
-    free(buf.data);
+    if (buf.allocator != NULL && buf.allocator->deallocate != NULL) {
+        buf.allocator->deallocate(buf.allocator, buf.data);
+    }
 }
 
 error_t data_buffer_resize(data_buffer_t self, size_t newsize)
 {
-    void* newbuf = realloc(self.data, newsize);
-    if (newbuf == NULL) {
-        return ERROR(errno);
+    if (self.allocator == NULL || self.allocator->reallocate == NULL) {
+        return ERROR(E_INVALID_OP);
     }
-    self.data = newbuf;
+
+    mem_alloc_result_t r = self.allocator->reallocate(self.allocator, self.data, newsize);
+    if (r.error != 0) {
+        return ERROR(r.error);
+    }
+    self.data = r.mem;
     self.length = newsize;
 
     return E_OK;

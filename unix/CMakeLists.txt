@@ -14,6 +14,7 @@ add_executable(fileio
   src/test_utils.c
   src/file_desc.c
   src/data_buffer.c
+  src/allocator.c
 )
 
 add_executable(fileio_sigasyncio
@@ -21,4 +22,5 @@ add_executable(fileio_sigasyncio
   src/test_utils.c
   src/file_desc.c
   src/data_buffer.c
+  src/allocator.c
 )

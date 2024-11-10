@@ -41,7 +41,7 @@ UTEST(FILE_IO, HOLE)
     file_desc_t file = result.fd;
 
     file_write_result_t write_result = file_write(file,
-                                                  DATA_BUFFER("ABC", 3));
+                                                  DATA_BUFFER_TRANSIENT("ABC", 3));
     if (write_result.error != 0 || write_result.written_count != 3) {
         ASSERT_FALSE_MSG(true, "failed to write initial data, bailing out");
     }
@@ -50,7 +50,7 @@ UTEST(FILE_IO, HOLE)
         ASSERT_FALSE_MSG(true, "failed to seek to the next position, bailing out");
     }
 
-    write_result = file_write(file, DATA_BUFFER("abc", 3));
+    write_result = file_write(file, DATA_BUFFER_TRANSIENT("abc", 3));
     if (write_result.error != 0 || write_result.written_count != 3) {
         ASSERT_FALSE_MSG(true, "failed to write the second batch of data, bailing out");
     }
@@ -101,7 +101,7 @@ clock_errno_t write_efficiency_test(size_t bufsize)
 
     deferred(file_close(file)) {
 
-        allocation_result_t alloc_res = std_allocate(bufsize);
+        buffer_alloc_result_t alloc_res = std_allocate_buffer(bufsize);
         if (alloc_res.error != 0) {
             result.error = alloc_res.error;
             goto end_of_file_block;
@@ -110,7 +110,7 @@ clock_errno_t write_efficiency_test(size_t bufsize)
 
         bool io_op_error = false;
         data_buffer_t buf;
-        scoped(buf = alloc_res.buffer, std_deallocate(buf)) {
+        scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
             stopwatch_start(&sw);
 
             file_read_result_t read_res = { 0 };
@@ -179,7 +179,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
     }
     file_desc_t file = open_result.fd;
 
-    if (file_write(file, DATA_BUFFER("ABC", 3)).written_count < 3) {
+    if (file_write(file, DATA_BUFFER_TRANSIENT("ABC", 3)).written_count < 3) {
         fprintf(stderr, "failed to write ABC\n");
         goto close_file;
     }
@@ -189,7 +189,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
         goto close_file;
     }
 
-    if (file_write(file, DATA_BUFFER("abc", 3)).written_count < 3) {
+    if (file_write(file, DATA_BUFFER_TRANSIENT("abc", 3)).written_count < 3) {
         fprintf(stderr, "failed to write abc\n");
         goto close_file;
     }
@@ -201,7 +201,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
 
     data_buffer_t buf = { 0 };
     bool failed_read = false;
-    scoped (buf = file_read(file, 6).buffer, std_deallocate(buf)) {
+    scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
         if (buf.length < 6) {
             failed_read = true;
             break;
@@ -220,7 +220,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
         goto close_file;
     }
 
-    const data_buffer_t actual_stored_data = DATA_BUFFER("ABCabc", 6);
+    const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
     ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
                     (char*)buf.data);
 

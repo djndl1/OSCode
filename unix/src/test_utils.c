@@ -51,7 +51,7 @@ int print_error(int error, const char *fmt, ...)
 
     deferred(free(msg)) {
 
-        allocation_result_t buf_result = std_allocate(
+        buffer_alloc_result_t buf_result = std_allocate_buffer(
             sizeof(char) * (strlen(msg) + strlen(fmt) + 3));
         if (buf_result.error != 0) {
             n = -1;
@@ -59,7 +59,7 @@ int print_error(int error, const char *fmt, ...)
         }
 
         data_buffer_t buf = buf_result.buffer;
-        deferred(std_deallocate(buf)) {
+        deferred(data_buffer_deallocate(buf)) {
 
             snprintf(buf.data, buf.length, "%s: %s", msg, fmt);
 
