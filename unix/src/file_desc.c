@@ -1,7 +1,15 @@
 #include "file_desc.h"
 
+#define _GNU_SOURCE
+
 #include <errno.h>
 #include <stdbool.h>
+#include <fcntl.h>
+
+#if !defined(_GNU_SOURCE) || !defined(O_TMPFILE)
+#define O_TMPFILE 0
+#endif
+
 
 file_desc_result_t file_open(const char *pathname, int flags)
 {
