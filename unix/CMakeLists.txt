@@ -15,3 +15,10 @@ add_executable(fileio
   src/file_desc.c
   src/data_buffer.c
 )
+
+add_executable(fileio_sigasyncio
+  src/fileio_sigasyncio.c
+  src/test_utils.c
+  src/file_desc.c
+  src/data_buffer.c
+)

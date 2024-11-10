@@ -1,5 +1,7 @@
 #include "test_utils.h"
 
+#include "data_buffer.h"
+
 #include <time.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -40,22 +42,32 @@ double stopwatch_elapsed_seconds(const stopwatch_t *self)
 
 int print_error(int error, const char *fmt, ...)
 {
-    const char *msg = strerror(error);
-    size_t len = sizeof(char) * (strlen(msg) + strlen(fmt) + 3);
-    char *buf = malloc(len);
-    if (buf == NULL) {
-        return 0;
+    const char *msg_internal = strerror(error);
+    char *msg = strdup(msg_internal);
+    int n = 0;
+    if (msg == NULL) {
+        return -1;
     }
-    snprintf(buf, len, "%s: %s", msg, fmt);
 
-    va_list vl;
-    va_start(vl, fmt);
-    int n = vfprintf(stderr, buf, vl);
-    va_end(vl);
+    deferred(free(msg)) {
 
-free_buf:
-    if (buf != NULL) {
-        free(buf);
+        allocation_result_t buf_result = std_allocate(
+            sizeof(char) * (strlen(msg) + strlen(fmt) + 3));
+        if (buf_result.error != 0) {
+            n = -1;
+            break;
+        }
+
+        data_buffer_t buf = buf_result.buffer;
+        deferred(std_deallocate(buf)) {
+
+            snprintf(buf.data, buf.length, "%s: %s", msg, fmt);
+
+            va_list vl;
+            va_start(vl, fmt);
+            n = vfprintf(stderr, buf.data, vl);
+            va_end(vl);
+        }
     }
     return n;
 }
