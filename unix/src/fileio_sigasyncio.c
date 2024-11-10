@@ -66,7 +66,8 @@ void interrupt_handler(int sig)
 
 static bool install_interrupt_handler()
 {
-    struct sigaction sigact = {  0 };
+    struct sigaction sigact = { 0 };
+    sigemptyset(&sigact.sa_mask);
     sigact.sa_handler = interrupt_handler;
 
     return sigaction(SIGINT, &sigact, NULL) != -1;
@@ -74,7 +75,8 @@ static bool install_interrupt_handler()
 
 static bool install_sigio_handler()
 {
-    struct sigaction sigact = {  0 };
+    struct sigaction sigact = { 0 };
+    sigemptyset(&sigact.sa_mask);
     sigact.sa_sigaction = sigio_handler;
     sigact.sa_flags = SA_SIGINFO | SA_RESTART;
 
@@ -83,32 +85,33 @@ static bool install_sigio_handler()
 
 UTEST(FILEIO, SIG_OASYNC)
 {
+    install_interrupt_handler();
+    if (!install_sigio_handler()) {
+        print_error(errno, "Failed to install a handler for SIGIO\n");
+        ASSERT_TRUE(false);
+    }
+
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock == -1) {
         print_error(errno, "Failed to create a unix socket\n");
         ASSERT_TRUE(false);
     }
-    install_interrupt_handler();
+
+    int r0 = fcntl(sock, F_SETOWN, getpid());
+    if (r0 == -1) {
+        print_error(errno, "Failed to set the owner of SIGIO\n");
+        ASSERT_TRUE(false);
+    }
 
     int fl = fcntl(sock, F_GETFL);
     if (fl == -1) {
         print_error(errno, "Failed to get the file flags of the socket\n");
         ASSERT_TRUE(false);
     }
-    int r0 = fcntl(sock, F_SETFL, fl | O_ASYNC);
+
+    r0 = fcntl(sock, F_SETFL, fl | O_ASYNC);
     if (r0 == -1) {
         print_error(errno, "Failed to set the file flags of the socket to O_ASYNC\n");
-        ASSERT_TRUE(false);
-    }
-
-    r0 = fcntl(sock, F_SETOWN, getpid());
-    if (r0 == -1) {
-        print_error(errno, "Failed to set the owner of SIGIO\n");
-        ASSERT_TRUE(false);
-    }
-
-    if (!install_sigio_handler()) {
-        print_error(errno, "Failed to install a handler for SIGIO\n");
         ASSERT_TRUE(false);
     }
 
@@ -138,6 +141,10 @@ UTEST(FILEIO, SIG_OASYNC)
         if ((peer = accept(sock, (struct sockaddr*)&peer_addr, &addr_len)) == -1) {
             print_error(errno, "Failed to accept a unix socket connection\n");
         }
+        printf("connection from %s\n", peer_addr.sun_path);
+
+        send(peer, "ABC", 3, 0);
+        close(peer);
     }
 
 close_socket:
