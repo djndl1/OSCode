@@ -22,5 +22,6 @@ dyn_cstr_result_t dyn_cstr_from(dyn_cstr_t str, const allocator_t *allocator);
 
 dyn_cstr_result_t dyn_cstr_literal(const char *lit, const allocator_t *allocator);
 
+void dyn_cstr_destroy(dyn_cstr_t self);
 
 #endif // DYN_CSTR_H_

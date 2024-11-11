@@ -201,19 +201,23 @@ UTEST(FILEIO, APPEND_ALWAYS)
         goto close_file;
     }
 
-    data_buffer_t buf = { 0 };
-    scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
-        if (buf.length < 6) {
-            fprintf(stderr, "failed to read all bytes\n");
-            break;
+    {
+        data_buffer_t buf = { 0 };
+        scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
+            if (buf.length < 6) {
+                fprintf(stderr, "failed to read all bytes\n");
+                break;
+            }
+            {
+                dyn_cstr_t s;
+                scoped(s = dyn_cstr_from_buffer(buf, std_allocator).str, dyn_cstr_destroy(s)) {
+                    const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
+                    printf("%s\n", dyn_cstr_nbts(s));
+                    ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
+                                    dyn_cstr_nbts(s));
+                }
+            }
         }
-
-         dyn_cstr_t s = dyn_cstr_from_buffer(buf, std_allocator).str;
-
-         const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
-         printf("%s\n", dyn_cstr_nbts(s));
-         ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
-                         dyn_cstr_nbts(s));
     }
 close_file:
     file_close(file);

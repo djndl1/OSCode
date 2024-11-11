@@ -41,3 +41,21 @@ dyn_cstr_result_t dyn_cstr_literal(const char *lit, const allocator_t *allocator
 {
     return _create_dyn_cstr_from_nbts(lit, allocator);
 }
+
+size_t dyn_cstr_len(dyn_cstr_t self)
+{
+    if (self._data.data == NULL || self._data.length == 0) {
+        return 0;
+    }
+
+    return strlen(self._data.data);
+}
+
+void dyn_cstr_destroy(dyn_cstr_t self)
+{
+    if (self._data.data == NULL || self._data.allocator == NULL) {
+        return;
+    }
+
+    self._data.allocator->deallocate(self._data.allocator, self._data.data);
+}
