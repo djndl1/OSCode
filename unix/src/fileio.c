@@ -13,6 +13,7 @@
 
 #include "test_utils.h"
 #include "file_desc.h"
+#include "dyn_cstr.h"
 
 UTEST(FILE_IO, OPENMAX)
 {
@@ -175,6 +176,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
 
     file_desc_result_t open_result = file_create(append_file, O_APPEND | O_RDWR, S_IRWXU | S_IRWXG);
     if (open_result.error != 0) {
+        print_error(open_result.error, "failed to open\n");
         goto ret;
     }
     file_desc_t file = open_result.fd;
@@ -200,32 +202,23 @@ UTEST(FILEIO, APPEND_ALWAYS)
     }
 
     data_buffer_t buf = { 0 };
-    bool failed_read = false;
     scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
         if (buf.length < 6) {
-            failed_read = true;
+            fprintf(stderr, "failed to read all bytes\n");
             break;
         }
 
-        error_t e = data_buffer_resize(buf, 7);
-        if (e.error != 0) {
-            fprintf(stderr, "Bytes read, resize failed: %s, %d\n", strerror(e.error), e.error);
-            goto close_file;
-        }
-        byte_buffer_at(buf, 6) = '\0';
+         dyn_cstr_t s = dyn_cstr_from_buffer(buf, std_allocator).str;
+
+         const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
+         printf("%s\n", dyn_cstr_nbts(s));
+         ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
+                         dyn_cstr_nbts(s));
     }
-
-    if (failed_read) {
-        fprintf(stderr, "failed to read all bytes\n");
-        goto close_file;
-    }
-
-    const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
-    ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
-                    (char*)buf.data);
-
 close_file:
     file_close(file);
+delete_file:
+    unlink(append_file);
 ret:
     return;
 }
