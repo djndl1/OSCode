@@ -51,6 +51,11 @@ size_t dyn_cstr_len(dyn_cstr_t self)
     return strlen(self._data.data);
 }
 
+int dyn_cstr_compare(dyn_cstr_t self, dyn_cstr_t other)
+{
+    return strcmp(self._data.data, other._data.data);
+}
+
 void dyn_cstr_destroy(dyn_cstr_t self)
 {
     if (self._data.data == NULL || self._data.allocator == NULL) {
