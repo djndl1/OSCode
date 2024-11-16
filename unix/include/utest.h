@@ -342,7 +342,7 @@ static UTEST_INLINE utest_int64_t utest_ns(void) {
     defined(__HAIKU__)
   struct timespec ts;
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) &&              \
-    !defined(__HAIKU__)
+    !defined(__HAIKU__) && !defined(__ANDROID__)
   timespec_get(&ts, TIME_UTC);
 #else
   const clockid_t cid = CLOCK_REALTIME;
