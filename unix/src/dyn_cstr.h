@@ -6,6 +6,7 @@
 
 typedef struct {
     data_buffer_t _data;
+    size_t _len;
 } dyn_cstr_t;
 
 typedef struct {
@@ -18,8 +19,13 @@ typedef struct {
     char *_p;
 } dyn_cstr_iter_t;
 
-#define dyn_cstr_nbts(str) ((char*)(str._data.data))
-#define dyn_cstr_at(str, idx) ((dyn_cstr_nbts(str))[idx])
+
+static inline char *dyn_cstr_nbts(dyn_cstr_t self)
+{
+    return ((char*)(self._data.data));
+}
+
+#define dyn_cstr_at(self, idx) ((dyn_cstr_nbts(self))[idx])
 
 dyn_cstr_result_t dyn_cstr_from_buffer(data_buffer_t buf, const allocator_t *allocator);
 
@@ -27,7 +33,10 @@ dyn_cstr_result_t dyn_cstr_from(dyn_cstr_t str, const allocator_t *allocator);
 
 dyn_cstr_result_t dyn_cstr_literal(const char *lit, const allocator_t *allocator);
 
-size_t dyn_cstr_len(dyn_cstr_t self);
+static inline size_t dyn_cstr_len(dyn_cstr_t self)
+{
+    return self._len;
+}
 
 int dyn_cstr_compare(dyn_cstr_t self, dyn_cstr_t other);
 
@@ -63,13 +72,13 @@ static inline const char *dyn_cstr_iter_cur_cref(const dyn_cstr_iter_t self)
 
 static inline bool dyn_cstr_iter_next(dyn_cstr_iter_t *self)
 {
-    char *tmp = self->_str._data.data;
+    char *tmp = (char*)self->_str._data.data;
     if (tmp == NULL || *tmp == '\0') {
         return false;
     }
 
     if (self->_p == NULL) {
-        self->_p = self->_str._data.data;
+        self->_p = (char*)self->_str._data.data;
         return true;
     }
 

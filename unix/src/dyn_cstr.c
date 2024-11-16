@@ -2,6 +2,18 @@
 
 #include <string.h>
 
+static void sync_len(dyn_cstr_t *self)
+{
+    size_t l = 0;
+    if (self->_data.data == NULL || self->_data.length == 0) {
+        l = 0;
+    } else {
+        l = strlen(self->_data.data);
+    }
+
+    self->_len = l;
+}
+
 static dyn_cstr_result_t _create_dyn_cstr_from_data(const void *data,
                                                     size_t count,
                                                     const allocator_t *allocator)
@@ -16,6 +28,7 @@ static dyn_cstr_result_t _create_dyn_cstr_from_data(const void *data,
 
      dyn_cstr_t str = { ._data = buf };
      dyn_cstr_at(str, count) = '\0';
+     sync_len(&str);
 
      return (dyn_cstr_result_t) { .error = 0, .str = str };
 }
@@ -40,15 +53,6 @@ dyn_cstr_result_t dyn_cstr_from(dyn_cstr_t str, const allocator_t *allocator)
 dyn_cstr_result_t dyn_cstr_literal(const char *lit, const allocator_t *allocator)
 {
     return _create_dyn_cstr_from_nbts(lit, allocator);
-}
-
-size_t dyn_cstr_len(dyn_cstr_t self)
-{
-    if (self._data.data == NULL || self._data.length == 0) {
-        return 0;
-    }
-
-    return strlen(self._data.data);
 }
 
 int dyn_cstr_compare(dyn_cstr_t self, dyn_cstr_t other)
