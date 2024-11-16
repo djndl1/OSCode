@@ -27,9 +27,15 @@ static inline char *dyn_cstr_nbts(dyn_cstr_t self)
 
 #define dyn_cstr_at(self, idx) ((dyn_cstr_nbts(self))[idx])
 
+#define dyn_cstr_from_buffer_stdalloc(buf) (dyn_cstr_from_buffer(buf, std_allocator))
+
 dyn_cstr_result_t dyn_cstr_from_buffer(data_buffer_t buf, const allocator_t *allocator);
 
+#define dyn_cstr_from_stdalloc(str) (dyn_cstr_from(str, std_allocator))
+
 dyn_cstr_result_t dyn_cstr_from(dyn_cstr_t str, const allocator_t *allocator);
+
+#define dyn_cstr_literal_stdalloc(lit) (dyn_cstr_literal(lit, std_allocator))
 
 dyn_cstr_result_t dyn_cstr_literal(const char *lit, const allocator_t *allocator);
 
