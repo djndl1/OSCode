@@ -36,7 +36,7 @@ static inline timespan_t _timespan_from(int d, int h, int m, int64_t secs, int64
     int64_t msecsticks = TS_TICKS_PER_MILLISECOND * (int64_t)msecs;
     int64_t usecsticks = TS_TICKS_PER_MICROSECOND * (int64_t)usecs;
 
-    int64_t ticks = dticks + hticks + mticks + secticks + msecticks + usecticks;
+    int64_t ticks = dticks + hticks + mticks + secsticks + msecsticks + usecsticks;
 
     return (timespan_t) { ._ticks = ticks };
 }
