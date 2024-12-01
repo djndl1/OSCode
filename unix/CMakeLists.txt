@@ -16,6 +16,7 @@ add_executable(fileio
   src/data_buffer.c
   src/allocator.c
   src/dyn_cstr.c
+  src/file_poll.c
 )
 
 add_executable(fileio_sigasyncio
