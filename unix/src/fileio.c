@@ -83,6 +83,70 @@ struct clock_errno {
 };
 typedef struct clock_errno clock_errno_t;
 
+clock_errno_t write_efficiency_test_buffered(size_t bufsize)
+{
+    clock_errno_t result = { 0 };
+
+    const char *input_file = getenv("FILEIO_TEST_INPUT");
+    if (input_file == NULL) {
+        result.error = EINVAL;
+        goto ret_result;
+    }
+
+    FILE *input_fd = fopen(input_file, "rb");
+    if (input_fd == NULL) {
+        result.error = errno;
+        goto ret_result;
+    }
+    FILE *file = input_fd;
+
+    deferred(fclose(file)) {
+
+        buffer_alloc_result_t alloc_res = std_allocate_buffer(bufsize);
+        if (alloc_res.error != 0) {
+            result.error = alloc_res.error;
+            goto end_of_file_block;
+        }
+        stopwatch_t sw = stopwatch_new();
+
+        bool io_op_error = false;
+        data_buffer_t buf;
+        scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
+            stopwatch_start(&sw);
+
+            size_t read_res = 0;
+            while ((read_res = fread(buf.data, sizeof(uint8_t), buf.length, file)),
+                   read_res > 0 && !feof(file) && !ferror(file)) {
+
+                if (fwrite(buf.data, sizeof(uint8_t), read_res, stdout) != read_res) {
+                    // write error
+                    result.error = errno;
+                    io_op_error = true;
+                    goto end_of_buf_block;
+                }
+            }
+
+            // read error
+            if (ferror(file)) {
+                result.error = errno;
+                io_op_error = true;
+                break;
+            }
+        end_of_buf_block: ;
+        }
+
+        if (!io_op_error) {
+            stopwatch_stop(&sw);
+            result.time = stopwatch_elapsed_clocks(&sw);
+        }
+
+    end_of_file_block: ;
+    }
+
+ret_result:
+    return result;
+}
+
 clock_errno_t write_efficiency_test(size_t bufsize)
 {
     clock_errno_t result = { 0 };
@@ -144,6 +208,28 @@ clock_errno_t write_efficiency_test(size_t bufsize)
 
 ret_result:
     return result;
+}
+
+// the result should be pretty much the same using standard I/O
+UTEST(FILEIO, BUFFERED_IO_BUF_EFFICIENCY)
+{
+    size_t bufsizes[] = {
+        1, 2, 4, 8, 16, 32, 64, 128, 256,
+        512, 1024, 2048, 4096, 8192, 16384,
+        32768, 65536, 131072, 262144, 524288
+    };
+    for (size_t i = 0; i < sizeof(bufsizes) / sizeof(size_t); i++) {
+        size_t bufsize = bufsizes[i];
+        clock_errno_t result = write_efficiency_test_buffered(bufsize);
+        if (result.error) {
+            print_error(result.error, "bufsize %zu \n", bufsize);
+            continue;
+        }
+        double elapsed_secs = ((double)result.time / CLOCKS_PER_SEC);
+        fprintf(stderr,
+                "Bufsize %zu time consumption: %lf\n",
+                bufsize, elapsed_secs);
+    }
 }
 
 UTEST(FILEIO, BUF_EFFICIENCY)
