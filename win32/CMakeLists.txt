@@ -4,16 +4,15 @@ project(Win32API)
 
 include(ExternalProject)
 
-set(CMAKE_SYSTEM_NAME WINDOWS)
-
+set(NO_SONAME ON)
+set(CMAKE_PLATFORM_NO_VERSIONED_SONAME ON)
+set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(
   lib/include
   ${CMAKE_BINARY_DIR}/gnulib)
-
 set(GNULIB_BINARY_DIR ${CMAKE_BINARY_DIR}/gnulib)
-
 add_compile_options(
   $<$<COMPILE_LANGUAGE:C>:-std=c17>)
 add_compile_options(
@@ -27,6 +26,30 @@ ExternalProject_Add(gnulib
   CONFIGURE_COMMAND AR=${CMAKE_AR} CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} ../../lib/gnulib/configure --host=${HOST_TRIPLET} --build=${BUILD_TRIPLET}
   BUILD_COMMAND make
 )
+
+set(winapi_src
+    src/winhandle.c
+)
+add_library(cwinapi-static STATIC
+  ${winapi_src}
+)
+target_include_directories(cwinapi-static AFTER
+  PUBLIC include/
+)
+target_compile_definitions(cwinapi-static
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
+
+add_library(cwinapi SHARED
+  ${winapi_src}
+)
+target_include_directories(cwinapi AFTER
+  PUBLIC include/
+)
+target_compile_definitions(cwinapi
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501
+)
+target_link_options(cwinapi PRIVATE -v)
+
 
 add_executable(CreateProcess
   src/CreateProcess.cpp
@@ -110,5 +133,5 @@ target_link_options(console_ctrl PRIVATE -mconsole -municode)
 add_executable(system_info
   src/system_info.c)
 target_compile_definitions(system_info
-  PRIVATE UNITCODE _UNICODE _WIN32_WINNT=0x0600)
+  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0600)
 target_link_options(system_info PRIVATE -mconsole -municode)
