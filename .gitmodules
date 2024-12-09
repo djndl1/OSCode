@@ -1,0 +1,3 @@
+[submodule "win32/deps/modernlib"]
+	path = win32/deps/modernlib
+	url = git@github.com:djndl1/modernlib.git
