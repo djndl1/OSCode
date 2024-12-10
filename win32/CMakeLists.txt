@@ -11,6 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(
   lib/include
+  include
   deps/modernlib/include
   ${CMAKE_BINARY_DIR}/gnulib)
 set(GNULIB_BINARY_DIR ${CMAKE_BINARY_DIR}/gnulib)
@@ -29,34 +30,7 @@ ExternalProject_Add(gnulib
 )
 
 add_subdirectory(deps/modernlib)
-
-set(winapi_src
-    src/winhandle.c
-    src/winfile.c
-)
-add_library(cwinapi_static STATIC
-  ${winapi_src}
-)
-
-link_directories(AFTER ${modernlib_BINARY_DIR})
-target_include_directories(cwinapi_static AFTER
-  PUBLIC include/
-)
-target_compile_definitions(cwinapi_static
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
-target_link_libraries(cwinapi_static PUBLIC modernlib_static)
-
-add_library(cwinapi SHARED
-  ${winapi_src}
-)
-target_include_directories(cwinapi AFTER
-  PUBLIC include/
-)
-target_compile_definitions(cwinapi
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501
-)
-target_link_options(cwinapi PRIVATE -v)
-target_link_libraries(cwinapi PUBLIC modernlib)
+add_subdirectory(src)
 
 
 add_executable(CreateProcess
@@ -81,6 +55,7 @@ add_executable(cp src/cp.c)
 target_compile_definitions(cp
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
 target_link_options(cp PRIVATE -mconsole)
+target_link_libraries(cp cwinapi_static)
 
 add_custom_target(
   cpw32 ALL

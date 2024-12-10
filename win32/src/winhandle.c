@@ -2,15 +2,38 @@
 
 const winhandle invalid_winhandle = (winhandle){ .handle = INVALID_HANDLE_VALUE };
 
-bool winhandle_close(winhandle handle)
+handle_info_result winhandle_info(winhandle handle)
 {
-    return CloseHandle(handle.handle);
+    DWORD flags = 0;
+    if (GetHandleInformation(handle.handle, &flags)) {
+        return (handle_info_result){
+            .status = WIN_OK,
+            .inheritable = flags & HANDLE_FLAG_INHERIT,
+            .protected_from_close = flags & HANDLE_FLAG_PROTECT_FROM_CLOSE,
+        };
+    } else {
+        return (handle_info_result){
+            .status = WIN_LASTERR,
+        };
+    }
 }
 
-
-winerror last_error()
+static winstatus set_winhandle_flag(winhandle self, DWORD mask, bool bit)
 {
-    DWORD err = GetLastError();
+    if (SetHandleInformation(self.handle, mask, bit)) {
+        return WIN_OK;
+    } else {
+        return WIN_LASTERR;
+    }
 
-    return (winerror) { .code = err };
+}
+
+winstatus winhandle_set_inheritable(winhandle self, bool inheritable)
+{
+    return set_winhandle_flag(self, HANDLE_FLAG_INHERIT, inheritable);
+}
+
+winstatus winhandle_set_protected_from_close(winhandle self, bool inheritable)
+{
+    return set_winhandle_flag(self, HANDLE_FLAG_PROTECT_FROM_CLOSE, inheritable);
 }

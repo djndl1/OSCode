@@ -3,6 +3,8 @@
 
 #include <windows.h>
 
+#include "winerror.h"
+
 #include <wchar.h>
 #include <stdbool.h>
 
@@ -14,29 +16,33 @@ typedef struct winhandle {
 
 extern const winhandle invalid_winhandle;
 
-typedef struct winerror {
-    DWORD code;
-} winerror;
-
-#define WINERROR(e) ((winerror) { .code = e })
-
-static inline bool is_handle_valid(winhandle h)
+static inline bool winhandle_invalid(winhandle self)
 {
-    return h.handle == invalid_winhandle.handle;
+    return self.handle == invalid_winhandle.handle;
 }
 
-typedef struct winstatus {
-    winerror error;
-    bool succeeded;
-} winstatus;
+static inline bool winhandle_close(winhandle self)
+{
+    return CloseHandle(self.handle);
+}
 
-#define WINSTATUS(err, ok) ((winstatus) { .error = err , .succeeded = ok })
-#define WIN_OK ((winstatus) { .succeeded = true })
-#define WIN_ERR(e) WINSTATUS(e, false)
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN10
+static inline bool winhandle_same_kernel_object(winhandle self, winhandle second)
+{
+    return CompareObjectHandles(self.handle, second.handle);
+}
+#endif
 
+typedef struct handle_info_result {
+    winstatus status;
+    bool inheritable;
+    bool protected_from_close;
+} handle_info_result;
 
-bool winhandle_close(winhandle handle);
+handle_info_result winhandle_info(winhandle handle);
 
-winerror last_error();
+winstatus winhandle_set_inheritable(winhandle self, bool inheritable);
+
+winstatus winhandle_set_protected_from_close(winhandle self, bool inheritable);
 
 #endif // WINHANDLE_H_

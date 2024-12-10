@@ -9,6 +9,7 @@
 #include <wchar.h>
 
 #include <windows.h>
+#include "winfile.h"
 
 #define ARGUMENT_ERROR 1
 #define SOURCE_FILE_FAILURE 2
@@ -18,6 +19,7 @@
 #define CHAR_ERROR 6
 
 #define BUF_SIZE 256
+
 
 /**
  * @returns (transfer)
@@ -88,51 +90,61 @@ int copy_with_win32(const char *dst, const char *src)
         goto free_wsrc;
     }
 
-	HANDLE hIn = CreateFile(wsrc, GENERIC_READ, FILE_SHARE_READ, NULL,
-			OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hIn == INVALID_HANDLE_VALUE) {
-		fprintf(stderr, "Cannot open input file: 0x%lx\n", GetLastError());
+    file_open_result open_result = winfile_open(wsrc, (file_open_request){
+            .requested_access = GENERIC_READ,
+            .share_mode = FILE_SHARE_READ,
+            .creation_disposition = OPEN_EXISTING,
+            .flags_attributes = FILE_ATTRIBUTE_NORMAL,
+        });
+    winhandle inhandle = open_result.file_handle;
+	if (!open_result.status.succeeded) {
+		fprintf(stderr, "Cannot open input file: 0x%x\n", open_result.status.error.code);
 
 		retval = SOURCE_FILE_FAILURE;
         goto free_wdst;
 	}
 
-	HANDLE hOut = CreateFile(wdst, GENERIC_WRITE, 0, NULL,
-			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hOut == INVALID_HANDLE_VALUE) {
-		fprintf(stderr, "Cannot open output file: 0x%lx\n", GetLastError());
+	file_open_result out_open_result = winfile_open(wdst, (file_open_request){
+            .requested_access = GENERIC_WRITE,
+            .creation_disposition = CREATE_ALWAYS,
+            .flags_attributes = FILE_ATTRIBUTE_NORMAL,
+        });
+	if (!out_open_result.status.succeeded) {
+		fprintf(stderr, "Cannot open output file: 0x%x\n", out_open_result.status.error.code);
 
         retval = DEST_FILE_FAILURE;
         goto close_in;
 	}
+    winhandle outhandle = out_open_result.file_handle;
 
-    CHAR *buffer = (char*)malloc(sizeof(CHAR) * BUF_SIZE);
-    if (buffer == NULL) {
+    buffer_alloc_result buf_alloc_res = data_buffer_new(BUF_SIZE * sizeof(CHAR), std_allocator);
+    if (buf_alloc_res.error) {
         retval = MEMORY_ERROR;
         goto close_out;
     }
+    data_buffer buf = buf_alloc_res.buffer;
 
-    DWORD nIn = 0;
-	while (ReadFile(hIn, buffer, BUF_SIZE, &nIn, NULL) && nIn > 0) {
-        DWORD nOut = 0;
-		WriteFile(hOut, buffer, nIn, &nOut, NULL);
-		if (nIn != nOut) {
-			fprintf(stderr, "Fatal write error: 0x%lx\n", GetLastError());
-
+    file_read_result read_result;
+	while ((read_result = winfile_sync_read_into(inhandle, buf)),
+            read_result.status.succeeded && read_result.read_count > 0) {
+        DWORD nOut;
+        if (!WriteFile(outhandle.handle, buf.data, read_result.read_count, &nOut, NULL)) {
             retval = WRITE_ERROR;
             goto close_out;
-		}
-	}
+        }
+    }
 
+free_buffer:
+    data_buffer_deallocate(buf);
 close_out:
-    if (hOut != INVALID_HANDLE_VALUE) {
-        CloseHandle (hOut);
-        hOut = INVALID_HANDLE_VALUE;
+    if (!winhandle_invalid(outhandle)) {
+        winhandle_close(outhandle);
+        outhandle = invalid_winhandle;
     }
 close_in:
-    if (hIn != INVALID_HANDLE_VALUE) {
-        CloseHandle (hIn);
-        hIn = INVALID_HANDLE_VALUE;
+    if (!winhandle_invalid(inhandle)) {
+        winhandle_close(inhandle);
+        inhandle = invalid_winhandle;
     }
 free_wdst:
     free(wdst);
