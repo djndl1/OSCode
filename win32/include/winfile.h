@@ -1,6 +1,7 @@
 #ifndef WINFILE_H_
 #define WINFILE_H_
 
+#include <windows.h>
 #include "winhandle.h"
 #include <data_buffer.h>
 #include <stdint.h>

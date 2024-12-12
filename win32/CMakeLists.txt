@@ -30,6 +30,7 @@ ExternalProject_Add(gnulib
 )
 
 add_subdirectory(deps/modernlib)
+install(TARGETS modernlib DESTINATION ${CMAKE_BINARY_DIR})
 add_subdirectory(src)
 
 
