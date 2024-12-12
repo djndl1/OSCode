@@ -90,7 +90,7 @@ int copy_with_win32(const char *dst, const char *src)
         goto free_wsrc;
     }
 
-    file_open_result open_result = winfile_open(wsrc, (file_open_request){
+    winfile_open_result open_result = winfile_open(wsrc, (winfile_open_request){
             .requested_access = GENERIC_READ,
             .share_mode = FILE_SHARE_READ,
             .creation_disposition = OPEN_EXISTING,
@@ -104,7 +104,7 @@ int copy_with_win32(const char *dst, const char *src)
         goto free_wdst;
 	}
 
-	file_open_result out_open_result = winfile_open(wdst, (file_open_request){
+	winfile_open_result out_open_result = winfile_open(wdst, (winfile_open_request){
             .requested_access = GENERIC_WRITE,
             .creation_disposition = CREATE_ALWAYS,
             .flags_attributes = FILE_ATTRIBUTE_NORMAL,
@@ -124,11 +124,14 @@ int copy_with_win32(const char *dst, const char *src)
     }
     data_buffer buf = buf_alloc_res.buffer;
 
-    file_read_result read_result;
+    winfile_read_result read_result;
 	while ((read_result = winfile_sync_read_into(inhandle, buf)),
             read_result.status.succeeded && read_result.read_count > 0) {
         DWORD nOut;
-        if (!WriteFile(outhandle.handle, buf.data, read_result.read_count, &nOut, NULL)) {
+
+        winfile_write_result write_result;
+        if ((write_result = winfile_sync_write(outhandle, buf, read_result.read_count)),
+             !write_result.status.succeeded) {
             retval = WRITE_ERROR;
             goto close_out;
         }

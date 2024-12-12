@@ -2,17 +2,17 @@
 
 const winhandle invalid_winhandle = (winhandle){ .handle = INVALID_HANDLE_VALUE };
 
-handle_info_result winhandle_info(winhandle handle)
+winhandle_info_result winhandle_info(winhandle handle)
 {
     DWORD flags = 0;
     if (GetHandleInformation(handle.handle, &flags)) {
-        return (handle_info_result){
+        return (winhandle_info_result){
             .status = WIN_OK,
             .inheritable = flags & HANDLE_FLAG_INHERIT,
             .protected_from_close = flags & HANDLE_FLAG_PROTECT_FROM_CLOSE,
         };
     } else {
-        return (handle_info_result){
+        return (winhandle_info_result){
             .status = WIN_LASTERR,
         };
     }

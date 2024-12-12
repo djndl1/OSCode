@@ -5,7 +5,7 @@
 #include <data_buffer.h>
 #include <stdint.h>
 
-typedef struct file_open_request {
+typedef struct winfile_open_request {
     uint32_t requested_access;
     uint32_t share_mode;
     bool handle_inheritable;
@@ -14,32 +14,39 @@ typedef struct file_open_request {
     uint32_t flags_attributes;
 
     winhandle template_file;
-} file_open_request;
+} winfile_open_request;
 
-typedef struct file_open_result {
+typedef struct winfile_open_result {
     winstatus status;
     winhandle file_handle;
-} file_open_result;
+} winfile_open_result;
 
-file_open_result winfile_open(const wchar_t *filename, file_open_request request);
+winfile_open_result winfile_open(const wchar_t *filename, const winfile_open_request request);
 
-typedef struct file_read_result {
+typedef struct winfile_read_result {
     winstatus status;
     uint32_t read_count;
-} file_read_result;
+} winfile_read_result;
 
-file_read_result winfile_sync_read_into(winhandle fh,
-                                        data_buffer buffer);
+winfile_read_result winfile_sync_read_into(const winhandle fh,
+                                           data_buffer buffer);
 
-typedef struct file_read_result_buffer {
+typedef struct winfile_read_result_buffer {
     winstatus status;
     data_buffer buffer;
     uint32_t read_count;
-} file_read_result_buffer;
+} winfile_read_result_buffer;
 
-file_read_result_buffer winfile_sync_read_as_buffer(winhandle fh,
-                                                    uint32_t count,
-                                                    const mem_allocator *allocator);
+winfile_read_result_buffer winfile_sync_read_as_buffer(const winhandle fh,
+                                                       uint32_t count,
+                                                       const mem_allocator *allocator);
+
+typedef struct winfile_write_result {
+    winstatus status;
+    uint32_t written_count;
+} winfile_write_result;
+
+winfile_write_result winfile_sync_write(const winhandle self, const data_buffer buf, uint32_t write_count);
 
 
 #endif // WINFILE_H_
