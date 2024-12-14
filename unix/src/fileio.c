@@ -32,16 +32,16 @@ UTEST(FILE_IO, OFFSET_T)
 
 UTEST(FILE_IO, HOLE)
 {
-    file_desc_result_t result = file_create("file.hole",
+    file_desc_result result = file_create("file.hole",
                                             O_RDWR | O_TRUNC,
                                             S_IRWXU | S_IRWXG);
     if (result.error != 0) {
         print_error(result.error, "open error");
         ASSERT_FALSE_MSG(true, "failed to open: bailing out");
     }
-    file_desc_t file = result.fd;
+    file_desc file = result.fd;
 
-    file_write_result_t write_result = file_write(file,
+    file_write_result write_result = file_write(file,
                                                   DATA_BUFFER_TRANSIENT("ABC", 3));
     if (write_result.error != 0 || write_result.written_count != 3) {
         ASSERT_FALSE_MSG(true, "failed to write initial data, bailing out");
@@ -102,15 +102,15 @@ clock_errno_t write_efficiency_test_buffered(size_t bufsize)
 
     deferred(fclose(file)) {
 
-        buffer_alloc_result_t alloc_res = std_allocate_buffer(bufsize);
+        buffer_alloc_result alloc_res = std_allocate_buffer(bufsize);
         if (alloc_res.error != 0) {
             result.error = alloc_res.error;
             goto end_of_file_block;
         }
-        stopwatch_t sw = stopwatch_new();
+        stopwatch sw = stopwatch_new();
 
         bool io_op_error = false;
-        data_buffer_t buf;
+        data_buffer buf;
         scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
             stopwatch_start(&sw);
 
@@ -157,28 +157,28 @@ clock_errno_t write_efficiency_test(size_t bufsize)
         goto ret_result;
     }
 
-    file_desc_result_t input_fd = file_open(input_file, O_RDONLY);
+    file_desc_result input_fd = file_open(input_file, O_RDONLY);
     if (input_fd.error != 0) {
         result.error = input_fd.error;
         goto ret_result;
     }
-    file_desc_t file = input_fd.fd;
+    file_desc file = input_fd.fd;
 
     deferred(file_close(file)) {
 
-        buffer_alloc_result_t alloc_res = std_allocate_buffer(bufsize);
+        buffer_alloc_result alloc_res = std_allocate_buffer(bufsize);
         if (alloc_res.error != 0) {
             result.error = alloc_res.error;
             goto end_of_file_block;
         }
-        stopwatch_t sw = stopwatch_new();
+        stopwatch sw = stopwatch_new();
 
         bool io_op_error = false;
-        data_buffer_t buf;
+        data_buffer buf;
         scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
             stopwatch_start(&sw);
 
-            file_read_result_t read_res = { 0 };
+            file_read_result read_res = { 0 };
             while ((read_res = file_read_into(file, buf)),
                    read_res.error == 0 && read_res.read_count > 0) {
                 if (file_write_until(fd_stdout, buf, read_res.read_count).written_count != read_res.read_count) {
@@ -260,12 +260,12 @@ UTEST(FILEIO, APPEND_ALWAYS)
         ASSERT_FALSE_MSG(true, "failed to get test append file");
     }
 
-    file_desc_result_t open_result = file_create(append_file, O_APPEND | O_RDWR, S_IRWXU | S_IRWXG);
+    file_desc_result open_result = file_create(append_file, O_APPEND | O_RDWR, S_IRWXU | S_IRWXG);
     if (open_result.error != 0) {
         print_error(open_result.error, "failed to open\n");
         goto ret;
     }
-    file_desc_t file = open_result.fd;
+    file_desc file = open_result.fd;
 
     if (file_write(file, DATA_BUFFER_TRANSIENT("ABC", 3)).written_count < 3) {
         fprintf(stderr, "failed to write ABC\n");
@@ -288,19 +288,19 @@ UTEST(FILEIO, APPEND_ALWAYS)
     }
 
     {
-        data_buffer_t buf = { 0 };
+        data_buffer buf = { 0 };
         scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
             if (buf.length < 6) {
                 fprintf(stderr, "failed to read all bytes\n");
                 break;
             }
             {
-                dyn_cstr_t s;
-                scoped(s = dyn_cstr_from_buffer_stdalloc(buf).str, dyn_cstr_destroy(s)) {
-                    const data_buffer_t actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
-                    printf("%s\n", dyn_cstr_nbts(s));
+                dyn_cstr s;
+                scoped((s = dyn_cstr_from_buffer(buf, std_allocator).str), dyn_cstr_destroy(s)) {
+                    const data_buffer actual_stored_data = DATA_BUFFER_TRANSIENT("ABCabc", 6);
+                    printf("%s\n", dyn_cstr_nts(s));
                     ASSERT_TRUE_MSG(data_buffer_compare(buf, actual_stored_data, buf.length),
-                                    dyn_cstr_nbts(s));
+                                    dyn_cstr_nts(s));
                 }
             }
         }
