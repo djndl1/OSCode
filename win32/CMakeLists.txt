@@ -13,21 +13,11 @@ include_directories(
   lib/include
   include
   deps/modernlib/include
-  ${CMAKE_BINARY_DIR}/gnulib)
-set(GNULIB_BINARY_DIR ${CMAKE_BINARY_DIR}/gnulib)
+)
 add_compile_options(
   $<$<COMPILE_LANGUAGE:C>:-std=c17>)
 add_compile_options(
   $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
-
-# there's a problem on Windows that Git bash cannot properly redirect
-# a header to an output file, resulting in a build failure
-ExternalProject_Add(gnulib
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/gnulib/
-  BINARY_DIR ${GNULIB_BINARY_DIR}
-  CONFIGURE_COMMAND AR=${CMAKE_AR} CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} ../../lib/gnulib/configure --host=${HOST_TRIPLET} --build=${BUILD_TRIPLET}
-  BUILD_COMMAND make
-)
 
 add_subdirectory(deps/modernlib)
 install(TARGETS modernlib DESTINATION ${CMAKE_BINARY_DIR})
@@ -85,9 +75,7 @@ add_executable(cat
   src/ReportError.c)
 target_compile_definitions(cat
   PRIVATE UNICODE _UNICODE)
-target_link_directories(cat PRIVATE ${GNULIB_BINARY_DIR}/lib/)
-add_dependencies(cat gnulib)
-target_link_options(cat PRIVATE -mconsole -lgnu)
+target_link_options(cat PRIVATE -mconsole)
 
 add_executable(pwd
   src/pwd.c
@@ -95,18 +83,14 @@ add_executable(pwd
   src/ConsoleUtility.c)
 target_compile_definitions(pwd
   PRIVATE UNICODE _UNICODE)
-target_link_directories(pwd PRIVATE ${GNULIB_BINARY_DIR}/lib/)
-target_link_options(pwd PRIVATE -lgnu -mconsole -municode)
-add_dependencies(pwd gnulib)
+target_link_options(pwd PRIVATE -mconsole -municode)
 
 
 add_executable(console_test
   src/console_test.c)
 target_compile_definitions(console_test
   PRIVATE UNICODE _UNICODE)
-target_link_directories(console_test PRIVATE ${GNULIB_BINARY_DIR}/lib/)
-target_link_options(console_test PRIVATE -lgnu -mconsole -municode)
-add_dependencies(console_test gnulib)
+target_link_options(console_test PRIVATE -mconsole -municode)
 
 add_executable(console_ctrl
   src/console_ctrl.c)
