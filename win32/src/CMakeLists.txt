@@ -19,6 +19,7 @@ target_link_libraries(cwinapi_static PUBLIC modernlib_static)
 add_library(cwinapi SHARED
   ${winapi_src}
 )
+set_target_properties(cwinapi PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_include_directories(cwinapi AFTER
   PUBLIC ../include/
 )

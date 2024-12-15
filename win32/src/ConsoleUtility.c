@@ -60,7 +60,7 @@ bool console_prompt(wchar_t const* prompt_msg, wchar_t* response, DWORD buf_len,
     }
 
     DWORD chars_read = -1;
-    WINBOOL succeeded =
+    BOOL succeeded =
         SetConsoleMode(hIn, ENABLE_LINE_INPUT | (echo ? ENABLE_ECHO_INPUT : 0) | ENABLE_PROCESSED_INPUT)
         && SetConsoleMode(hOut, ENABLE_LINE_INPUT | ENABLE_PROCESSED_OUTPUT)
         && ReadConsoleW(hIn, response, buf_len - 1, &chars_read, nullptr); // one reserved for NULL

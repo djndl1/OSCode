@@ -1,7 +1,5 @@
 #include "winhandle.h"
 
-const winhandle invalid_winhandle = (winhandle){ .handle = INVALID_HANDLE_VALUE };
-
 winhandle_info_result winhandle_info(winhandle handle)
 {
     DWORD flags = 0;

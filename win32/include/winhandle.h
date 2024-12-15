@@ -14,7 +14,7 @@ typedef struct winhandle {
 
 #define WINHANDLE(h) ((winhandle){ .handle = h })
 
-extern const winhandle invalid_winhandle;
+#define invalid_winhandle  ((winhandle){ .handle = INVALID_HANDLE_VALUE })
 
 static inline bool winhandle_invalid(const winhandle self)
 {

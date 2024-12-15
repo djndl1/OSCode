@@ -14,15 +14,15 @@ include_directories(
   include
   deps/modernlib/include
 )
-add_compile_options(
-  $<$<COMPILE_LANGUAGE:C>:-std=c17>)
-add_compile_options(
-  $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
+
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(deps/modernlib)
 install(TARGETS modernlib DESTINATION ${CMAKE_BINARY_DIR})
 add_subdirectory(src)
 
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 add_executable(CreateProcess
   src/CreateProcess.cpp
@@ -30,8 +30,7 @@ add_executable(CreateProcess
   lib/src/processes.cpp)
 target_compile_definitions(CreateProcess
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
-target_link_options(CreateProcess
-  PRIVATE -municode)
+target_link_options(CreateProcess PRIVATE -mconsole -municode)
 
 add_executable(ProcessIdentity
   src/ProcessIdentity.cpp
@@ -39,43 +38,41 @@ add_executable(ProcessIdentity
   lib/src/processes.cpp)
 target_compile_definitions(ProcessIdentity
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0601)
-target_link_options(ProcessIdentity
-  PRIVATE -municode)
+target_link_options(ProcessIdentity PRIVATE -mconsole -municode)
 
 add_executable(cp src/cp.c)
 target_compile_definitions(cp
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
-target_link_options(cp PRIVATE -mconsole)
 target_link_libraries(cp cwinapi_static)
+target_link_options(cp PRIVATE -mconsole)
 
 add_custom_target(
   cpw32 ALL
   ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/cp.exe
-  ${CMAKE_BINARY_DIR}/cpw32.exe
+  $<TARGET_FILE:cp>
+  $<TARGET_FILE_DIR:cp>/cpw32.exe
 )
 add_dependencies(cpw32 cp)
 add_custom_target(
   cpc ALL
   ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/cp.exe
-  ${CMAKE_BINARY_DIR}/cpc.exe
+  $<TARGET_FILE:cp>
+  $<TARGET_FILE_DIR:cp>/cpc.exe
 )
 add_dependencies(cpc cp)
 add_custom_target(
   cpw32s ALL
   ${CMAKE_COMMAND} -E copy
-  ${CMAKE_BINARY_DIR}/cp.exe
-  ${CMAKE_BINARY_DIR}/cpw32s.exe
+  $<TARGET_FILE:cp>
+  $<TARGET_FILE_DIR:cp>/cpw32s.exe
 )
 add_dependencies(cpw32s cp)
 
-add_executable(cat
-  src/cat.c
-  src/ReportError.c)
-target_compile_definitions(cat
-  PRIVATE UNICODE _UNICODE)
-target_link_options(cat PRIVATE -mconsole)
+#add_executable(cat
+#  src/cat.c
+ # src/ReportError.c)
+#target_compile_definitions(cat
+#  PRIVATE UNICODE _UNICODE)
 
 add_executable(pwd
   src/pwd.c
@@ -83,23 +80,23 @@ add_executable(pwd
   src/ConsoleUtility.c)
 target_compile_definitions(pwd
   PRIVATE UNICODE _UNICODE)
-target_link_options(pwd PRIVATE -mconsole -municode)
+target_link_options(pwd PRIVATE -municode -mconsole)
 
 
 add_executable(console_test
   src/console_test.c)
 target_compile_definitions(console_test
   PRIVATE UNICODE _UNICODE)
-target_link_options(console_test PRIVATE -mconsole -municode)
+target_link_options(console_test PRIVATE -municode -mconsole)
 
 add_executable(console_ctrl
   src/console_ctrl.c)
 target_compile_definitions(console_ctrl
   PRIVATE UNICODE _UNICODE)
-target_link_options(console_ctrl PRIVATE -mconsole -municode)
+target_link_options(console_ctrl PRIVATE -municode -mconsole)
 
 add_executable(system_info
   src/system_info.c)
 target_compile_definitions(system_info
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0600)
-target_link_options(system_info PRIVATE -mconsole -municode)
+target_link_options(system_info PRIVATE -municode -mconsole)

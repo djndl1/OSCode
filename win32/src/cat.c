@@ -2,7 +2,6 @@
 #define _WIN32_WINNT 0x0501
 
 #include "config.h"
-#include <unistd.h>
 
 #include <string.h>
 #include <stdlib.h>

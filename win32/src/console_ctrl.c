@@ -5,13 +5,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include <stdatomic.h>
+#include <signal.h>
 
-static atomic_bool exit_flag = false;
+static volatile sig_atomic_t exit_flag = 0;
 
 static BOOL WINAPI Handler(DWORD cntrlEvent)
 {
-    exit_flag = true;
+    exit_flag = 1;
 
     switch (cntrlEvent) {
         case CTRL_C_EVENT:
@@ -25,7 +25,7 @@ static BOOL WINAPI Handler(DWORD cntrlEvent)
             wprintf(L"Leaving handler in 1 second or less\n");
             return TRUE;
         default:
-            wprintf(L"Event %d. Leaving in <= 5 seconds\n");
+            wprintf(L"Event %d. Leaving in <= 5 seconds\n", cntrlEvent);
             Sleep(4000);
             wprintf(L"Leaving handler in 1 second or less\n");
             return TRUE;
