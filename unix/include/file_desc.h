@@ -56,7 +56,7 @@ file_desc_result file_open_at(const file_desc dir, const char *pathanem, int fla
 
 file_desc_result file_create_at(const file_desc dir, const char *pathanem, int flags);
 
-file_read_result file_read_into(const file_desc self, data_buffer buffer);
+file_read_result file_read_into(const file_desc self, const data_buffer buffer);
 
 file_read_result file_read(const file_desc, size_t);
 
@@ -66,6 +66,6 @@ file_write_result file_write_until(const file_desc, const data_buffer, size_t co
 
 file_seek_result file_seek(const file_desc, const file_seek_target);
 
-error_t file_close(const file_desc);
+error_t file_close(file_desc*);
 
 #endif // FILE_DESC_H_

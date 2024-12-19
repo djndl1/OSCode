@@ -62,7 +62,7 @@ file_desc_result file_create_at(const file_desc dir, const char *pathanem, int f
     return (file_desc_result){ .error = ENOSYS };
 }
 
-file_read_result file_read_into(const file_desc self, data_buffer buffer)
+file_read_result file_read_into(const file_desc self, const data_buffer buffer)
 {
     if (buffer.data == NULL || buffer.length == 0) {
         return (file_read_result) { .error = EINVAL };
@@ -161,12 +161,18 @@ file_seek_result file_seek(const file_desc self, const file_seek_target target)
     return result;
 }
 
-error_t file_close(const file_desc self)
+error_t file_close(file_desc *self)
 {
-    int e = close(self.fd);
+    if (self == nullptr) {
+        return ERR_FROM_CODE(EINVAL);
+    }
+
+    int e = close(self->fd);
     if (e == -1) {
         return ERR_FROM_CODE(e);
     }
+
+    self->fd = -1;
 
     return E_OK;
 }

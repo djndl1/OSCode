@@ -56,7 +56,7 @@ UTEST(FILE_IO, HOLE)
         ASSERT_FALSE_MSG(true, "failed to write the second batch of data, bailing out");
     }
 
-    file_close(file);
+    file_close(&file);
 }
 
 UTEST(FILEIO, ILP_OFF)
@@ -164,7 +164,7 @@ clock_errno_t write_efficiency_test(size_t bufsize)
     }
     file_desc file = input_fd.fd;
 
-    deferred(file_close(file)) {
+    deferred(file_close(&file)) {
 
         buffer_alloc_result alloc_res = std_allocate_buffer(bufsize);
         if (alloc_res.error != 0) {
@@ -306,7 +306,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
         }
     }
 close_file:
-    file_close(file);
+    file_close(&file);
 delete_file:
     unlink(append_file);
 ret:
