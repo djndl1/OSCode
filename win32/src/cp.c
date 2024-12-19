@@ -138,16 +138,14 @@ int copy_with_win32(const char *dst, const char *src)
     }
 
 free_buffer:
-    data_buffer_deallocate(buf);
+    data_buffer_destroy(&buf);
 close_out:
     if (!winhandle_invalid(outhandle)) {
-        winhandle_close(outhandle);
-        outhandle = invalid_winhandle;
+        winhandle_close(&outhandle);
     }
 close_in:
     if (!winhandle_invalid(inhandle)) {
-        winhandle_close(inhandle);
-        inhandle = invalid_winhandle;
+        winhandle_close(&inhandle);
     }
 free_wdst:
     free(wdst);

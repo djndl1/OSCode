@@ -30,7 +30,7 @@ typedef struct winfile_read_result {
 } winfile_read_result;
 
 winfile_read_result winfile_sync_read_into(const winhandle fh,
-                                           data_buffer buffer);
+                                           const data_buffer buffer);
 
 typedef struct winfile_read_result_buffer {
     winstatus status;

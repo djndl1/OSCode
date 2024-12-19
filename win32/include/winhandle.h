@@ -7,6 +7,7 @@
 
 #include <wchar.h>
 #include <stdbool.h>
+#include "basis.h"
 
 typedef struct winhandle {
     HANDLE handle;
@@ -21,9 +22,17 @@ static inline bool winhandle_invalid(const winhandle self)
     return self.handle == invalid_winhandle.handle;
 }
 
-static inline bool winhandle_close(const winhandle self)
+static inline bool winhandle_close(winhandle *self)
 {
-    return CloseHandle(self.handle);
+    if (self == nullptr || winhandle_invalid(*self)) {
+        return false;
+    }
+    bool status = CloseHandle(self->handle);
+    if (status) {
+        *self = invalid_winhandle;
+    }
+
+    return status;
 }
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WIN10

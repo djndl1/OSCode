@@ -38,8 +38,7 @@ UTEST(WIN32, NULL_BUFFER)
 
 close_file:
     if (!winhandle_invalid(h)) {
-        winhandle_close(h);
-        h = invalid_winhandle;
+        winhandle_close(&h);
     }
 }
 

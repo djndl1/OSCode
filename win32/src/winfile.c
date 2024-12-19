@@ -31,7 +31,7 @@ winfile_open_result winfile_open(const wchar_t *filename,
 }
 
 winfile_read_result winfile_sync_read_into(const winhandle fh,
-                                        data_buffer buffer)
+                                           const data_buffer buffer)
 {
     DWORD read_count = 0;
     if (ReadFile(fh.handle, buffer.data, buffer.length,
@@ -49,8 +49,8 @@ winfile_read_result winfile_sync_read_into(const winhandle fh,
 }
 
 winfile_read_result_buffer winfile_sync_read_as_buffer(const winhandle fh,
-                                                    uint32_t count,
-                                                    const mem_allocator *allocator)
+                                                       uint32_t count,
+                                                       const mem_allocator *allocator)
 {
     buffer_alloc_result alloc_res = data_buffer_new(count, allocator);
     if (alloc_res.error) {
@@ -70,7 +70,7 @@ winfile_read_result_buffer winfile_sync_read_as_buffer(const winhandle fh,
         };
     }
 
-    data_buffer_deallocate(buffer);
+    data_buffer_destroy(&buffer);
     return (winfile_read_result_buffer){
             .status = WIN_LASTERR,
             .read_count = 0,
