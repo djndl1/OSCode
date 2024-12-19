@@ -98,7 +98,7 @@ file_read_result file_read(const file_desc self, size_t count)
     }
 
     if (buf_result.read_count < buf.length) {
-        error_t e = data_buffer_resize(buf, buf_result.read_count);
+        error_t e = data_buffer_resize(&buf, buf_result.read_count);
         if (e.error != 0) {
             result.error = buf_result.error;
             result.read_count = 0;
@@ -112,7 +112,7 @@ file_read_result file_read(const file_desc self, size_t count)
     goto ret;
 
 deallocate_buf:
-    data_buffer_deallocate(buf);
+    data_buffer_destroy(&buf);
 ret:
     return result;
 }

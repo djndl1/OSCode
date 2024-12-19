@@ -111,7 +111,7 @@ clock_errno_t write_efficiency_test_buffered(size_t bufsize)
 
         bool io_op_error = false;
         data_buffer buf;
-        scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
+        scoped(buf = alloc_res.buffer, data_buffer_destroy(&buf)) {
             stopwatch_start(&sw);
 
             size_t read_res = 0;
@@ -175,7 +175,7 @@ clock_errno_t write_efficiency_test(size_t bufsize)
 
         bool io_op_error = false;
         data_buffer buf;
-        scoped(buf = alloc_res.buffer, data_buffer_deallocate(buf)) {
+        scoped(buf = alloc_res.buffer, data_buffer_destroy(&buf)) {
             stopwatch_start(&sw);
 
             file_read_result read_res = { 0 };
@@ -289,7 +289,7 @@ UTEST(FILEIO, APPEND_ALWAYS)
 
     {
         data_buffer buf = { 0 };
-        scoped (buf = file_read(file, 6).buffer, data_buffer_deallocate(buf)) {
+        scoped (buf = file_read(file, 6).buffer, data_buffer_destroy(&buf)) {
             if (buf.length < 6) {
                 fprintf(stderr, "failed to read all bytes\n");
                 break;

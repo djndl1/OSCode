@@ -59,7 +59,7 @@ int print_error(int error, const char *fmt, ...)
         }
 
         data_buffer buf = buf_result.buffer;
-        deferred(data_buffer_deallocate(buf)) {
+        deferred(data_buffer_destroy(&buf)) {
 
             snprintf(buf.data, buf.length, "%s: %s", msg, fmt);
 
