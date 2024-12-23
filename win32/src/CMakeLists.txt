@@ -2,6 +2,7 @@ set(winapi_src
     winhandle.c
     winfile.c
     winerror.c
+    win32_allocators.c
 )
 
 add_library(cwinapi_static STATIC
