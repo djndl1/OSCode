@@ -6,6 +6,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct winerror {
     uint32_t code;
 } winerror;
@@ -24,5 +28,9 @@ typedef struct winstatus {
 #define WIN_LASTERR WIN_ERR(last_error())
 
 winerror last_error();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINERROR_H_

@@ -1,4 +1,5 @@
 #include "winallocator.h"
+#include "olecom/allocator.h"
 #include "winhandle.h"
 
 #include <objbase.h>

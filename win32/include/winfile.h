@@ -6,6 +6,10 @@
 #include <data_buffer.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct winfile_open_request {
     uint32_t requested_access;
     uint32_t share_mode;
@@ -49,5 +53,8 @@ typedef struct winfile_write_result {
 
 winfile_write_result winfile_sync_write(const winhandle self, const data_buffer buf, uint32_t write_count);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINFILE_H_

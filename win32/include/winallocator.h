@@ -5,12 +5,16 @@
 
 #include "allocator.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const mem_allocator *const process_heap_allocator;
 
 winhandle heap_allocator_handle(const mem_allocator *const allocator);
 
-extern const mem_allocator *const com_allocator;
-
-#define ole_allocator com_allocator
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WIN32_ALLOCATORS_H_

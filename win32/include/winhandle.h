@@ -9,6 +9,10 @@
 #include <stdbool.h>
 #include "basis.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct winhandle {
     HANDLE handle;
 } winhandle;
@@ -53,5 +57,9 @@ winhandle_info_result winhandle_info(const winhandle handle);
 winstatus winhandle_set_inheritable(const winhandle self, bool inheritable);
 
 winstatus winhandle_set_protected_from_close(const winhandle self, bool inheritable);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINHANDLE_H_
