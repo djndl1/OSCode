@@ -13,6 +13,9 @@ static HANDLE get_allocator_heap(const mem_allocator *const self)
 winhandle heap_allocator_handle(const mem_allocator *const self)
 {
     HANDLE handle = get_allocator_heap(self);
+    if (handle == NULL) {
+        return invalid_winhandle;
+    }
     return (winhandle) { .handle = handle };
 }
 
@@ -21,11 +24,15 @@ static mem_alloc_result allocate_from_heap(const mem_allocator *const self,
                                            size_t byte_count)
 {
     HANDLE heapHandle = get_allocator_heap(self);
+    if (heapHandle == nullptr) {
+        return (mem_alloc_result){ .error = last_error().code };
+    }
+
     void *mem = HeapAlloc(heapHandle, 0, byte_count);
     mem_alloc_result result = { 0 };
     result.mem = mem;
     if (result.mem == nullptr) {
-        result.error = GetLastError();
+        result.error = last_error().code;
     }
     return result;
 }
@@ -42,11 +49,15 @@ static mem_alloc_result reallocate_from_heap(const mem_allocator *const self,
                                              size_t newsize)
 {
     HANDLE heapHandle = get_allocator_heap(self);
+    if (heapHandle == nullptr) {
+        return (mem_alloc_result){ .error = last_error().code };
+    }
+
     void *newmem = HeapReAlloc(heapHandle, 0, mem, newsize);
     mem_alloc_result result = { 0 };
     result.mem = newmem;
     if (result.mem == nullptr) {
-        result.error = GetLastError();
+        result.error = last_error().code;
     }
     return result;
 }
