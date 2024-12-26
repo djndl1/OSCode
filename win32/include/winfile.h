@@ -5,6 +5,7 @@
 #include "winhandle.h"
 #include <data_buffer.h>
 #include <stdint.h>
+#include "internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +27,7 @@ typedef struct winfile_open_result {
     winhandle file_handle;
 } winfile_open_result;
 
+CWINAPI_PUBLIC
 winfile_open_result winfile_open(const wchar_t *filename, const winfile_open_request request);
 
 typedef struct winfile_read_result {
@@ -33,6 +35,7 @@ typedef struct winfile_read_result {
     uint32_t read_count;
 } winfile_read_result;
 
+CWINAPI_PUBLIC
 winfile_read_result winfile_sync_read_into(const winhandle fh,
                                            const data_buffer buffer);
 
@@ -42,6 +45,7 @@ typedef struct winfile_read_result_buffer {
     uint32_t read_count;
 } winfile_read_result_buffer;
 
+CWINAPI_PUBLIC
 winfile_read_result_buffer winfile_sync_read_as_buffer(const winhandle fh,
                                                        uint32_t count,
                                                        const mem_allocator *allocator);
@@ -51,6 +55,7 @@ typedef struct winfile_write_result {
     uint32_t written_count;
 } winfile_write_result;
 
+CWINAPI_PUBLIC
 winfile_write_result winfile_sync_write(const winhandle self, const data_buffer buf, uint32_t write_count);
 
 #ifdef __cplusplus

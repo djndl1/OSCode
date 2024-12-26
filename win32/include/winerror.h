@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <stdbool.h>
+#include "internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +28,7 @@ typedef struct winstatus {
 #define WIN_ERR(e) WINSTATUS(e, false)
 #define WIN_LASTERR WIN_ERR(last_error())
 
+CWINAPI_PUBLIC
 winerror last_error();
 
 #ifdef __cplusplus

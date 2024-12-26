@@ -8,6 +8,7 @@
 #include <wchar.h>
 #include <stdbool.h>
 #include "basis.h"
+#include "internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,11 +22,13 @@ typedef struct winhandle {
 
 #define invalid_winhandle  ((winhandle){ .handle = INVALID_HANDLE_VALUE })
 
+CWINAPI_ALWAYS_INLINE
 static inline bool winhandle_invalid(const winhandle self)
 {
     return self.handle == invalid_winhandle.handle;
 }
 
+CWINAPI_ALWAYS_INLINE
 static inline bool winhandle_close(winhandle *self)
 {
     if (self == nullptr || winhandle_invalid(*self)) {
@@ -40,6 +43,7 @@ static inline bool winhandle_close(winhandle *self)
 }
 
 #if _WIN32_WINNT >= _WIN32_WINNT_WIN10
+CWINAPI_ALWAYS_INLINE
 static inline bool winhandle_same_kernel_object(const winhandle self, const winhandle second)
 {
     return CompareObjectHandles(self.handle, second.handle);
@@ -52,10 +56,13 @@ typedef struct winhandle_info_result {
     bool protected_from_close;
 } winhandle_info_result;
 
+CWINAPI_PUBLIC
 winhandle_info_result winhandle_info(const winhandle handle);
 
+CWINAPI_PUBLIC
 winstatus winhandle_set_inheritable(const winhandle self, bool inheritable);
 
+CWINAPI_PUBLIC
 winstatus winhandle_set_protected_from_close(const winhandle self, bool inheritable);
 
 #ifdef __cplusplus

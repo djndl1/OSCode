@@ -10,6 +10,7 @@ set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(
+  AFTER
   lib/include
   include
   deps/modernlib/include
@@ -42,8 +43,12 @@ target_link_options(ProcessIdentity PRIVATE -mconsole -municode)
 
 add_executable(cp src/cp.c)
 target_compile_definitions(cp
-  PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
+  PRIVATE CWINAPI_USE_STATIC UNICODE _UNICODE _WIN32_WINNT=0x0501)
 target_link_libraries(cp cwinapi_static)
+target_link_directories(cp
+  PUBLIC
+  ${CMAKE_BINARY_DIR}/src
+  ${CMAKE_BINARY_DIR}/deps/modernlib/)
 target_link_options(cp PRIVATE -mconsole)
 
 add_custom_target(
