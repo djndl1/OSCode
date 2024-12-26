@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <exception>
 #include <utility>
+#include <string>
 
 const wchar_t *get_error_message(int error)
 {
@@ -37,7 +38,7 @@ std::wstring windows::get_error_message(int error)
 {
     const wchar_t *msg_p = ::get_error_message(error);
     if (msg_p == nullptr) {
-        throw windows::message_format_error(error, L"Cannot find message for error " + error);
+        throw windows::message_format_error(error, L"Cannot find message for error " + std::to_wstring(error));
     }
     return std::wstring{std::move(msg_p)};
 }
