@@ -15,6 +15,9 @@ target_include_directories(cwinapi_static AFTER
 )
 target_compile_definitions(cwinapi_static
   PRIVATE CWINAPI_BUILD_STATIC UNICODE _UNICODE _WIN32_WINNT=0x0501)
+target_compile_definitions(cwinapi_static
+  PUBLIC MODERNLIB_STATIC_BUILD
+)
 target_link_libraries(cwinapi_static PUBLIC modernlib_static)
 
 add_library(cwinapi SHARED
