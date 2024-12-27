@@ -1,44 +1,24 @@
-#include "errors.h"
+#include "win32/errors.h"
 #include <cwchar>
 
 #include <windows.h>
 #include <stdlib.h>
 #include <exception>
 #include <utility>
+#include <cstdint>
 #include <string>
 
-const wchar_t *get_error_message(int error)
+#include "modernlib/dyn_cwstr.h"
+#include "modernlib/allocator.h"
+#include "cwinapi/winerror.h"
+
+std::wstring windows::get_error_message(uint32_t error)
 {
-    LPWSTR message;
-    DWORD num = ::FormatMessageW(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr,
-        error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPWSTR)&message,
-        0,
-        nullptr);
-
-    if (num == 0) {
-        return nullptr;
-    } else {
-        wchar_t *buffer = (wchar_t*) ::malloc(sizeof(wchar_t)*(num+1));
-        if (buffer == nullptr) {
-            goto success_ret;
-        }
-        ::wcscpy(buffer, message);
-
-success_ret:
-        ::LocalFree(message);
-        return buffer;
-    }
-}
-
-std::wstring windows::get_error_message(int error)
-{
-    const wchar_t *msg_p = ::get_error_message(error);
-    if (msg_p == nullptr) {
+    dyn_cwstr_result result = winerror_get_message(WINERROR(error),
+                                                   std_allocator);
+    if (result.error) {
         throw windows::message_format_error(error, L"Cannot find message for error " + std::to_wstring(error));
     }
-    return std::wstring{std::move(msg_p)};
+    const wchar_t *raw = dyn_cwstr_release(&result.str);
+    return std::wstring{std::move(raw)};
 }

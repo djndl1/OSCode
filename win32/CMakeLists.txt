@@ -31,6 +31,12 @@ add_executable(CreateProcess
   lib/src/processes.cpp)
 target_compile_definitions(CreateProcess
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
+target_link_libraries(CreateProcess cwinapi modernlib)
+target_link_directories(CreateProcess PUBLIC
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_BINARY_DIR}/src
+  ${CMAKE_BINARY_DIR}/deps/modernlib/
+)
 target_link_options(CreateProcess PRIVATE -mconsole -municode)
 
 add_executable(ProcessIdentity
@@ -39,6 +45,12 @@ add_executable(ProcessIdentity
   lib/src/processes.cpp)
 target_compile_definitions(ProcessIdentity
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0601)
+target_link_libraries(ProcessIdentity cwinapi modernlib)
+target_link_directories(ProcessIdentity PUBLIC
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_BINARY_DIR}/src
+  ${CMAKE_BINARY_DIR}/deps/modernlib/
+)
 target_link_options(ProcessIdentity PRIVATE -mconsole -municode)
 
 add_executable(cp src/cp.c)

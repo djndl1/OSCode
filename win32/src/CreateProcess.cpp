@@ -19,7 +19,7 @@ using std::codecvt;
 int wmain()
 {
     PROCESS_INFORMATION pi = { 0 };
-    int error = ::create_process(L"C:\\windows\\system32\\cmd.exe", nullptr, &pi);
+    uint32_t error = ::create_process(L"C:\\windows\\system32\\cmd.exe", nullptr, &pi);
     if (!error) {
         std::wcout << L"Created a process: " << pi.dwProcessId << L'\n';
     } else {
