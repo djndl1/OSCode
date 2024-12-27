@@ -1,4 +1,5 @@
-#include "winerror.h"
+#include "cwinapi/winerror.h"
+#include "modernlib/dyn_cwstr.h"
 
 winerror last_error()
 {

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "basis.h"
+#include "modernlib/basis.h"
 
 int wmain(int argc, wchar_t* argv[])
 {

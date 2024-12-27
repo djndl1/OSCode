@@ -9,7 +9,7 @@
 #include <wchar.h>
 
 #include <windows.h>
-#include "winfile.h"
+#include "cwinapi/winfile.h"
 
 #define ARGUMENT_ERROR 1
 #define SOURCE_FILE_FAILURE 2

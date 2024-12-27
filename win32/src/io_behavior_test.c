@@ -2,8 +2,8 @@
 //#include <windows.h>
 
 #include <stdio.h>
-#include <winfile.h>
-#include <winhandle.h>
+#include <cwinapi/winfile.h>
+#include <cwinapi/winhandle.h>
 
 
 #include "utest.h"

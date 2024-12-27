@@ -1,7 +1,8 @@
 #ifndef OLE_ALLOCATOR_H
 #define OLE_ALLOCATOR_H
 
-#include "internal/compilers.h"
+#include "cwinapi/cwinapi_internal/compilers.h"
+#include "modernlib/allocator.h"
 
 #ifdef __cplusplus
 extern "C" {

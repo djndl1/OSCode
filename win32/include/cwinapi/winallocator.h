@@ -1,10 +1,10 @@
 #ifndef WINALLOCATORS_H_
 #define WINALLOCATORS_H_
 
-#include <winhandle.h>
+#include "cwinapi/winhandle.h"
 
-#include "allocator.h"
-#include "internal/compilers.h"
+#include "modernlib/allocator.h"
+#include "cwinapi/cwinapi_internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,10 +1,12 @@
-#include "processes.h"
+#include "win32/processes.h"
 
-#include <windows.h>
 #include <vector>
 #include <cwchar>
+#include <cstdint>
 #include <string>
 #include <numeric>
+
+#include <windows.h>
 
 using std::vector;
 using std::wstring;

@@ -1,7 +1,7 @@
-#include "winallocator.h"
-#include "olecom/allocator.h"
-#include "winhandle.h"
-#include "winerror.h"
+#include "cwinapi/winallocator.h"
+#include "cwinapi/olecom/allocator.h"
+#include "cwinapi/winhandle.h"
+#include "cwinapi/winerror.h"
 
 #include <objbase.h>
 

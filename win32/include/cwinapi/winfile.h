@@ -3,9 +3,9 @@
 
 #include <windows.h>
 #include "winhandle.h"
-#include <data_buffer.h>
+#include <modernlib/data_buffer.h>
 #include <stdint.h>
-#include "internal/compilers.h"
+#include "cwinapi_internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {

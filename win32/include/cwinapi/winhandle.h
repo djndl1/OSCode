@@ -7,8 +7,8 @@
 
 #include <wchar.h>
 #include <stdbool.h>
-#include "basis.h"
-#include "internal/compilers.h"
+#include "modernlib/basis.h"
+#include "cwinapi_internal/compilers.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -5,10 +5,11 @@
 #include <locale>
 #include <cwchar>
 
-#include "processes.h"
-#include "errors.h"
+#include "win32/processes.h"
+#include "win32/errors.h"
 
 #include <utility>
+#include <cstdint>
 
 using std::string;
 using std::wstring;
