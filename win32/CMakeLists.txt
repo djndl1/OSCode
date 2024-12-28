@@ -27,8 +27,7 @@ add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 add_executable(CreateProcess
   src/CreateProcess.cpp
-  lib/src/errors.cpp
-  lib/src/processes.cpp)
+)
 target_compile_definitions(CreateProcess
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0501)
 target_link_libraries(CreateProcess cwinapi modernlib)
@@ -40,9 +39,7 @@ target_link_directories(CreateProcess PUBLIC
 target_link_options(CreateProcess PRIVATE -mconsole -municode)
 
 add_executable(ProcessIdentity
-  src/ProcessIdentity.cpp
-  lib/src/errors.cpp
-  lib/src/processes.cpp)
+  src/ProcessIdentity.cpp)
 target_compile_definitions(ProcessIdentity
   PRIVATE UNICODE _UNICODE _WIN32_WINNT=0x0601)
 target_link_libraries(ProcessIdentity cwinapi modernlib)

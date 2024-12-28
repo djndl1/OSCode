@@ -7,10 +7,12 @@
 #include <string>
 #include <exception>
 #include <cstdint>
+#include <cwinapi/cwinapi_internal/compilers.h>
 
 namespace windows {
 
-    class win32_error : public std::exception {
+    class CWINAPI_PUBLIC
+    win32_error : public std::exception {
         private:
             uint32_t m_error_code;
 
@@ -31,11 +33,13 @@ namespace windows {
             }
     };
 
-    class message_format_error : public win32_error {
+    class CWINAPI_PUBLIC
+    message_format_error : public win32_error {
         public:
             using win32_error::win32_error;
     };
 
+    CWINAPI_PUBLIC
     std::wstring get_error_message(std::uint32_t error);
 }
 

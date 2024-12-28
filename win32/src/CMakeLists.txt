@@ -3,6 +3,9 @@ set(winapi_src
     winfile.c
     winerror.c
     win32_allocators.c
+    win32/errors.cpp
+    win32/processes.cpp
+    win32/utf_cvt.cpp
 )
 
 add_library(cwinapi_static STATIC
@@ -30,6 +33,7 @@ target_compile_definitions(cwinapi
   PRIVATE CWINAPI_BUILD_DLL UNICODE _UNICODE _WIN32_WINNT=0x0501
 )
 target_link_libraries(cwinapi PUBLIC modernlib)
+install(TARGETS cwinapi DESTINATION ${CMAKE_BINARY_DIR})
 
 add_executable(io_behavior_test
   io_behavior_test.c
